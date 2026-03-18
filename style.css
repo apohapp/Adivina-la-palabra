@@ -1,0 +1,100 @@
+:root {
+    /* Paleta de Colores extraída del Logo */
+    --gold: #fabc00;
+    --gold-dark: #cc9b00;
+    --pink: #e92063;
+    --pink-dark: #b6003d;
+    --blue: #32a7e2;
+    --blue-dark: #007bb6;
+    --red-text: #f03f36;
+    --bg-body: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #004586;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    text-align: center;
+    margin: 0;
+    padding: 15px;
+    min-height: 100vh;
+}
+
+.oculto { display: none !important; }
+.contenedor-principal { max-width: 600px; margin: 0 auto; }
+
+/* Estilo Moneda (Coin-style) de la imagen */
+.btn-coin, .slot-box, .btn-coin-round {
+    background: var(--bg-card);
+    border: 3px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.1), inset 0 2px 0 rgba(255,255,255,0.2);
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+/* Colores de Monedas específicos */
+.btn-coin.gold, .slot-box.gold, .btn-coin-round.gold { border-color: var(--gold-dark); background-color: var(--gold); color: white; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+.btn-coin.pink, .slot-box.pink, .btn-coin-round.pink { border-color: var(--pink-dark); background-color: var(--pink); color: white; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+.btn-coin.blue, .slot-box.blue, .btn-coin-round.blue { border-color: var(--blue-dark); background-color: var(--blue); color: white; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+
+/* --- MARCADOR SUPERIOR (Replica la imagen) --- */
+.marcador-superior {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 10px 0;
+}
+.logo-min { max-height: 50px; }
+.stats-left, .stats-right { flex: 1; text-align: left; }
+.stats-right { text-align: right; }
+.stat-item {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 5px;
+}
+.hearts-row { font-size: 16px; margin-right: 5px; }
+
+/* --- TECLADO Y PALABRAS --- */
+.contenedor-rayas { display: flex; gap: 4px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+.slot-box { width: 30px; height: 42px; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; border-width: 3px; }
+
+/* Botones del teclado (Replica los círculos de la imagen) */
+.btn-letter {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border-width: 3px;
+    font-size: 20px; font-weight: 800;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+.btn-letter:active { transform: translateY(2px); }
+
+/* --- FOOTER: HINT Y SKIP (Ubicación de la imagen) --- */
+.game-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 25px;
+    padding: 0 10px;
+}
+.btn-coin-round {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+}

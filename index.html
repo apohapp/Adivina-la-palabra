@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FUN Word Guessing Game</title>
+    
+    <meta name="theme-color" content="#ffffff">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="white-translucent">
+    <link rel="manifest" href="manifest.json">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div class="contenedor-principal">
+    
+    <div id="pantalla-inicio" class="pantalla-pwa">
+        <img src="icono.png" alt="Logo Game" class="logo-principal">
+        <input type="text" id="input-nombre" placeholder="Escribe tu nombre" autocomplete="off">
+        <button onclick="mostrarHost()" class="btn-coin blue">Crear Sala (Host)</button>
+        <button onclick="mostrarGuest()" class="btn-coin pink">Unirse a Sala</button>
+    </div>
+
+    <div id="pantalla-juego" class="pantalla-pwa oculto">
+        
+        <div class="marcador-superior">
+            <div class="stats-left">
+                <div class="stat-item"><span class="coin-icon gold"></span>Score: <span id="ui-score">0</span></div>
+                <div class="stat-item">Level: <span id="ui-level">1</span></div>
+            </div>
+            <img src="icono.png" alt="Game Logo" class="logo-min">
+            <div class="stats-right">
+                <div class="stat-item"><span id="ui-lives" class="hearts-row">❤️❤️❤️</span>Lives</div>
+                <div class="stat-item"><span class="coin-icon gold"></span>Coins: <span id="ui-coins">0</span></div>
+            </div>
+        </div>
+
+        <div class="zona-turnos tarjeta-pwa">
+            <h2 id="titulo-turno">Espera tu turno</h2>
+            <p id="info-reconeccion" class="msg-sys oculto">Reconectando con rival...</p>
+        </div>
+
+        <div id="zona-palabras-rival"></div>
+
+        <div class="game-footer">
+            <button onclick="intentarHint()" id="btn-hint" class="btn-coin-round gold star">HINT</button>
+            <button onclick="intentarSkip()" id="btn-skip" class="btn-coin-round pink">SKIP</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+<script>
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
+</script>
+
+</body>
+</html>
