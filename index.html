@@ -51,9 +51,11 @@
         
         .tarjeta-palabra { background: white; border: 3px solid var(--border-color); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 6px 12px rgba(0,0,0,0.05); transition: all 0.3s; }
         .tarjeta-palabra.resuelta { border-color: #10b981; background-color: #f0fdf4; }
-        .tarjeta-palabra.fracasada { border-color: var(--pink-dark); background-color: #fff0f5; opacity: 0.8; }
+        .tarjeta-palabra.fracasada { border-color: var(--pink-dark); background-color: #fff0f5; opacity: 0.9; }
         
-        .display-palabra { font-family: monospace; font-size: 32px; font-weight: 900; letter-spacing: 8px; text-align: center; margin: 10px 0 20px 0; color: var(--text-main); }
+        .display-palabra { font-family: monospace; font-size: 32px; font-weight: 900; letter-spacing: 8px; text-align: center; margin: 10px 0 10px 0; color: var(--text-main); }
+        .texto-revelacion { color: var(--pink-dark); font-size: 18px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; animation: popin 0.3s ease;}
+        
         .estadisticas { display: flex; justify-content: space-around; font-size: 13px; font-weight: 700; color: var(--text-muted); background: #f1f5f9; padding: 10px; border-radius: 10px; margin-bottom: 10px;}
         .err-peligro { color: var(--pink-light); }
 
@@ -63,12 +65,16 @@
 
         .historial { background: #f8fafc; border-radius: 12px; padding: 15px; height: 120px; overflow-y: auto; text-align: left; font-size: 13px; border: 2px solid var(--border-color); margin-top: 15px; }
         
-        .mis-secretos { background: #fff0f5; border: 2px dashed var(--pink-light); border-radius: 12px; padding: 15px; margin-top: 15px; text-align: center;}
-        .mis-secretos h3 { color: var(--pink-dark); margin: 0 0 10px 0; font-size: 16px; text-transform: uppercase;}
-        .item-secreto { font-family: monospace; font-size: 18px; font-weight: bold; letter-spacing: 3px; margin: 8px 0; padding: 5px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
+        .mis-secretos { background: #fff0f5; border: 2px dashed var(--pink-light); border-radius: 12px; padding: 15px; margin-top: 15px; text-align: left;}
+        .mis-secretos h3 { color: var(--pink-dark); margin: 0 0 10px 0; font-size: 16px; text-transform: uppercase; text-align: center;}
+        .item-secreto { font-family: monospace; font-size: 16px; font-weight: bold; letter-spacing: 2px; margin: 10px 0; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); line-height: 1.4;}
+        .item-secreto .original { font-size: 11px; color: var(--text-muted); font-family: 'Poppins', sans-serif; letter-spacing: normal; display: block; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px; margin-bottom: 6px;}
         
         .caja-input-pista { background: #f8fafc; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; margin-bottom: 15px; width: 100%; max-width: 320px; box-sizing: border-box; }
         .texto-pista { font-size: 14px; color: var(--blue-dark); font-weight: 600; background: #e0f2fe; padding: 8px; border-radius: 8px; margin-top: 10px; font-style: italic;}
+
+        @keyframes popin { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes latido { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -126,7 +132,7 @@
             <h3 style="color: var(--text-main);">Escribe tus Palabras Secretas</h3>
             <div id="guest-inputs-palabras" style="display:flex; flex-direction:column; align-items:center; width: 100%;"></div>
             <p id="error-guest" class="alerta"></p>
-            <button onclick="guestGuardarPalabras()" class="btn-blue">¡Listo para Jugar!</button>
+            <button id="btn-guest-listo" onclick="guestGuardarPalabras()" class="btn-blue">¡Listo para Jugar!</button>
         </div>
     </div>
 
@@ -136,13 +142,16 @@
             <p id="subtitulo-turno" style="font-size: 14px; margin-top: 5px; font-weight: 600;">Conectando jugadores...</p>
         </div>
 
+        <div id="zona-revancha" class="oculto" style="margin-bottom: 25px; text-align: center;">
+            <button onclick="solicitarRevancha()" class="btn-yellow" style="font-size: 20px; padding: 15px 30px; animation: latido 1.5s infinite;">🔄 ¡JUGAR REVANCHA!</button>
+        </div>
+
         <div id="zona-palabras"></div>
 
         <div class="historial" id="historial"></div>
         
         <div class="mis-secretos" id="zona-mis-secretos">
             <h3>Tus Palabras Secretas</h3>
-            <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 10px 0;">Así va el progreso de tu rival:</p>
             <div id="lista-mis-secretos"></div>
         </div>
 
@@ -157,30 +166,20 @@
     let numPalabras = 1; let turnoActual = 1;
     let misPalabras = []; let progresoRival = []; 
     let estadoMisPalabras = []; 
-    let enJuegoActivo = false; // Variable para saber si estamos jugando
+    let enJuegoActivo = false; 
     
     const MAX_ERR_LETRA = 10; const MAX_ERR_PALABRA = 3;
 
-    // --- MANEJO DEL BOTÓN ATRÁS (History API) ---
-    // Creamos el estado inicial al cargar
-    history.replaceState({ pantalla: 'inicio' }, "Inicio", "");
+    try { history.replaceState({ pantalla: 'inicio' }, "Inicio", ""); } catch(e) {}
 
     window.addEventListener('popstate', function(event) {
         if (enJuegoActivo && turnoActual !== 0) {
-            // Si están jugando y la partida no ha terminado
-            let salir = confirm("⚠️ ¿Estás seguro de que quieres abandonar la partida? Perderás todo el progreso y se desconectará la sala.");
-            if (salir) {
-                location.reload(); // Recarga y limpia todo
-            } else {
-                // Si dicen que no, volvemos a empujar el estado para seguir atrapando el botón atrás
-                history.pushState({ pantalla: 'juego' }, "Juego", "#juego");
-            }
+            let salir = confirm("⚠️ ¿Estás seguro de que quieres abandonar la partida? Perderás todo el progreso.");
+            if (salir) location.reload(); else try { history.pushState({ pantalla: 'juego' }, "Juego", "#juego"); } catch(e){}
         } else {
-            // Si están en los menús o la partida ya terminó, volvemos al inicio limpio
             location.reload();
         }
     });
-    // ---------------------------------------------
 
     function guardarNombre() { let n = document.getElementById('input-nombre').value.trim(); if(n) miNombre = n; }
     
@@ -212,7 +211,7 @@
         guardarNombre(); miRol = 1; 
         document.getElementById('pantalla-inicio').classList.add('oculto'); 
         document.getElementById('pantalla-host').classList.remove('oculto'); 
-        history.pushState({ pantalla: 'config' }, "Configurar", "#host"); // Registrar paso
+        try { history.pushState({ pantalla: 'config' }, "Configurar", "#host"); } catch(e){}
     }
     
     function mostrarGuest() { 
@@ -220,20 +219,25 @@
         document.getElementById('pantalla-inicio').classList.add('oculto'); 
         document.getElementById('pantalla-guest').classList.remove('oculto'); 
         peer = new Peer(); 
-        history.pushState({ pantalla: 'config' }, "Unirse", "#guest"); // Registrar paso
+        try { history.pushState({ pantalla: 'config' }, "Unirse", "#guest"); } catch(e){}
     }
 
     function hostGenerarInputs() {
         numPalabras = parseInt(document.getElementById('host-num-palabras').value);
         document.getElementById('host-paso1').classList.add('oculto'); document.getElementById('host-paso2').classList.remove('oculto');
         generarInputs('host-inputs-palabras', numPalabras);
-        let codigoRoom = Math.random().toString(36).substring(2, 6).toUpperCase();
-        peer = new Peer('funword-' + codigoRoom);
-        peer.on('open', id => { document.getElementById('mostrar-codigo').innerText = codigoRoom; });
-        peer.on('connection', c => {
-            conn = c; configurarMensajes();
+        
+        if (!peer) {
+            let codigoRoom = Math.random().toString(36).substring(2, 6).toUpperCase();
+            peer = new Peer('funword-' + codigoRoom);
+            peer.on('open', id => { document.getElementById('mostrar-codigo').innerText = codigoRoom; });
+            peer.on('connection', c => {
+                conn = c; configurarMensajes();
+                document.getElementById('btn-esperar').innerText = "¡Rival Conectado! Iniciar"; document.getElementById('btn-esperar').disabled = false;
+            });
+        } else {
             document.getElementById('btn-esperar').innerText = "¡Rival Conectado! Iniciar"; document.getElementById('btn-esperar').disabled = false;
-        });
+        }
     }
 
     function hostGuardarPalabras() {
@@ -253,7 +257,8 @@
     function guestGuardarPalabras() {
         let p = leerYValidarInputs('guest-inputs-palabras', numPalabras, 'error-guest'); if(!p) return;
         misPalabras = p; conn.send({ tipo: 'SECRET', palabras: misPalabras, nombre: miNombre });
-        document.getElementById('guest-paso2').innerHTML = "<p style='font-weight:bold; color:var(--blue-light);'>Esperando al Host...</p>";
+        document.getElementById('guest-inputs-palabras').innerHTML = "<p style='color:var(--blue-dark); font-weight:bold; text-align:center;'>Esperando que el Host inicie el juego...</p>";
+        document.getElementById('btn-guest-listo').classList.add('oculto');
     }
 
     function configurarMensajes() {
@@ -261,7 +266,9 @@
             if(datos.tipo === 'INIT' && miRol === 2) {
                 numPalabras = datos.num; nombreRival = datos.nombre;
                 document.getElementById('guest-paso1').classList.add('oculto'); document.getElementById('guest-paso2').classList.remove('oculto');
-                document.getElementById('guest-mostrar-num').innerText = numPalabras; generarInputs('guest-inputs-palabras', numPalabras);
+                document.getElementById('guest-mostrar-num').innerText = numPalabras; 
+                generarInputs('guest-inputs-palabras', numPalabras);
+                document.getElementById('btn-guest-listo').classList.remove('oculto'); 
             }
             else if(datos.tipo === 'SECRET' && miRol === 1) {
                 nombreRival = datos.nombre; iniciarProgresoLocal(datos.palabras);
@@ -272,6 +279,7 @@
                 turnoActual = datos.turno; iniciarProgresoLocal(datos.palabrasHost); iniciarTablero();
             }
             else if(datos.tipo === 'ACCION') { procesarAccionRival(datos); }
+            else if(datos.tipo === 'REMATCH_REQ') { prepararRevancha(); } 
         });
     }
 
@@ -279,41 +287,49 @@
         progresoRival = palabrasRival.map(p => { 
             return { secreto: p.palabra, pista: p.pista, adivinadas: [p.palabra.charAt(0), p.palabra.charAt(p.palabra.length - 1)], errLetra: 0, errPalabra: 0, resuelta: false, fracasada: false }; 
         });
-        
         estadoMisPalabras = misPalabras.map(p => { 
             return { secreto: p.palabra, adivinadas: [p.palabra.charAt(0), p.palabra.charAt(p.palabra.length - 1)], resuelta: false, fracasada: false }; 
         });
     }
 
     function iniciarTablero() {
-        enJuegoActivo = true; // El juego ha comenzado, activamos el seguro del botón atrás
-        history.pushState({ pantalla: 'juego' }, "Juego", "#juego"); // Registrar paso del juego
+        enJuegoActivo = true; 
+        try { history.pushState({ pantalla: 'juego' }, "Juego", "#juego"); } catch(e){}
         
         document.getElementById('pantalla-host').classList.add('oculto'); document.getElementById('pantalla-guest').classList.add('oculto');
         document.getElementById('pantalla-juego').classList.remove('oculto');
+        document.getElementById('zona-revancha').classList.add('oculto'); 
         dibujarTarjetasPalabras(); 
         dibujarMisSecretos(); 
         actualizarTurnoUI();
         agregarLog(`🏁 Partida iniciada contra ${nombreRival}.`);
     }
 
-    function generarDisplayPalabra(obj) {
-        if(obj.resuelta || obj.fracasada) return obj.secreto.split('').join(' ');
-        let display = '';
-        for(let char of obj.secreto) { display += obj.adivinadas.includes(char) ? char + ' ' : '_ '; }
-        return display.trim();
-    }
-
     function dibujarTarjetasPalabras() {
         let html = '';
+        let juegoTerminado = (turnoActual === 0); // Determina si el juego finalizó globalmente
+
         progresoRival.forEach((p, index) => {
-            let esResuelta = p.resuelta; let esFracasada = p.fracasada;
-            let displayStr = generarDisplayPalabra(p);
+            let esResuelta = p.resuelta; 
+            let esFracasada = p.fracasada;
+            
+            // LÓGICA DE REVELACIÓN DE PALABRA
+            let mostrarRespuesta = esResuelta || esFracasada || juegoTerminado;
+            let displayStr = mostrarRespuesta 
+                ? p.secreto.split('').join(' ') // Revela todo si terminó, fracasó o resolvió
+                : p.secreto.split('').map(c => p.adivinadas.includes(c) ? c : '_').join(' ');
+
             let checkL = p.errLetra >= MAX_ERR_LETRA * 0.7 ? 'err-peligro' : ''; let checkP = p.errPalabra >= MAX_ERR_PALABRA - 1 ? 'err-peligro' : '';
             let claseExtra = esResuelta ? 'resuelta' : (esFracasada ? 'fracasada' : '');
             let iconoTop = esResuelta ? '✅' : (esFracasada ? '❌' : '');
             
             let htmlPista = p.pista ? `<div class="texto-pista">💡 Pista: ${p.pista}</div>` : '';
+            
+            // AVISO DE LA PALABRA QUE ERA (Solo si fracasó o el juego terminó y no la adivinó)
+            let htmlRevelacion = '';
+            if (esFracasada || (juegoTerminado && !esResuelta)) {
+                htmlRevelacion = `<div class="texto-revelacion">¡La palabra era:<br>${p.secreto}!</div>`;
+            }
 
             html += `
             <div class="tarjeta-palabra ${claseExtra}">
@@ -324,7 +340,8 @@
                 </div>
                 ${htmlPista}
                 <div class="display-palabra">${displayStr}</div>
-                <div class="controles-adivinar ${(esResuelta || esFracasada) ? 'oculto' : ''}" id="controles-p${index}">
+                ${htmlRevelacion}
+                <div class="controles-adivinar ${mostrarRespuesta ? 'oculto' : ''}" id="controles-p${index}">
                     <div class="fila-control">
                         <input type="text" id="input-letra-${index}" class="input-letra" maxlength="1" placeholder="A" autocomplete="off">
                         <button onclick="intentarLetra(${index})" class="btn-yellow">Letra</button>
@@ -347,12 +364,17 @@
             let color = p.resuelta ? '#10b981' : (p.fracasada ? 'var(--pink-light)' : 'var(--text-main)');
             let icono = p.resuelta ? '✅' : (p.fracasada ? '❌' : '⏳');
             
-            html += `<div class="item-secreto" style="color: ${color};">Palabra ${i+1}: ${display} ${icono}</div>`;
+            html += `
+            <div class="item-secreto" style="color: ${color};">
+                <span class="original">Tú escribiste: <b>${p.secreto}</b></span>
+                Rival: ${display} ${icono}
+            </div>`;
         });
         document.getElementById('lista-mis-secretos').innerHTML = html;
     }
 
     function actualizarTurnoUI() {
+        if (turnoActual === 0) return; // Si el juego terminó, no actualiza turnos
         let titulo = document.getElementById('titulo-turno'); let subtitulo = document.getElementById('subtitulo-turno'); let marcador = document.getElementById('caja-marcador');
         let esMiTurno = (numPalabras === 1) ? (turnoActual === miRol) : true;
 
@@ -419,7 +441,11 @@
         }
 
         conn.send({ tipo: 'ACCION', accion: tipo, idx: index, val: valor, acierto: acierto, fin: finMensaje });
-        dibujarTarjetasPalabras(); actualizarTurnoUI();
+        
+        // Solo actualiza tarjetas si el juego NO ha terminado (terminarJuego ya lo hace por su cuenta)
+        if(turnoActual !== 0) {
+            dibujarTarjetasPalabras(); actualizarTurnoUI();
+        }
     }
 
     function procesarAccionRival(datos) {
@@ -440,12 +466,13 @@
         if(numPalabras === 1) { turnoActual = miRol; actualizarTurnoUI(); }
     }
 
+    // MODIFICADO: Ahora NO oculta la zona de palabras y fuerza el redibujo para mostrar revelaciones
     function terminarJuego(ganador, mensaje) {
         let marcador = document.getElementById('caja-marcador');
         let titulo = document.getElementById('titulo-turno');
         let subtitulo = document.getElementById('subtitulo-turno');
         
-        document.getElementById('zona-palabras').classList.add('oculto');
+        document.getElementById('zona-revancha').classList.remove('oculto'); 
         
         marcador.className = "marcador"; 
         if (ganador === miNombre) {
@@ -463,7 +490,37 @@
         subtitulo.style.fontSize = "16px";
         subtitulo.style.color = "white";
         
-        turnoActual = 0; 
+        turnoActual = 0; // Detiene el juego
+        dibujarTarjetasPalabras(); // Redibuja las tarjetas para mostrar todas las palabras que faltaban!
+    }
+
+    function solicitarRevancha() {
+        conn.send({ tipo: 'REMATCH_REQ' });
+        prepararRevancha();
+    }
+
+    function prepararRevancha() {
+        enJuegoActivo = false;
+        document.getElementById('pantalla-juego').classList.add('oculto');
+        document.getElementById('zona-revancha').classList.add('oculto');
+        document.getElementById('historial').innerHTML = '';
+        document.getElementById('lista-mis-secretos').innerHTML = '';
+        document.getElementById('caja-marcador').className = "marcador"; 
+        
+        document.getElementById('titulo-turno').style.fontSize = "22px";
+        document.getElementById('subtitulo-turno').style.fontSize = "14px";
+        
+        if (miRol === 1) { 
+            document.getElementById('pantalla-host').classList.remove('oculto');
+            document.getElementById('host-paso1').classList.remove('oculto'); 
+            document.getElementById('host-paso2').classList.add('oculto');
+        } else { 
+            document.getElementById('pantalla-guest').classList.remove('oculto');
+            document.getElementById('guest-paso1').classList.add('oculto');
+            document.getElementById('guest-paso2').classList.remove('oculto');
+            document.getElementById('guest-inputs-palabras').innerHTML = "<p style='color:var(--blue-dark); font-weight:bold; text-align:center;'>El Host está configurando la nueva sala...</p>";
+            document.getElementById('btn-guest-listo').classList.add('oculto');
+        }
     }
 
     function agregarLog(texto) {
