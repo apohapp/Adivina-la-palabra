@@ -86,15 +86,28 @@
         /* CONTROLES COMPACTOS */
         .panel-mando { background: #f1f5f9; padding: 15px; border-radius: 20px; border: 2px dashed #cbd5e1; display: flex; flex-direction: column; gap: 12px; align-items: center; }
         .fila-mando { display: flex; gap: 8px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; }
+        .input-l-mini { width: 55px !important; height: 50px !important; padding: 0 !important; font-size: 24px !important; font-weight: 900; border-radius: 14px !important; border: 3px solid var(--yellow-light) !important; margin: 0 !important; text-transform: uppercase; box-shadow: 0 4px 0 rgba(0,0,0,0.05);}
+        .btn-l-mini { margin: 0 !important; height: 50px; padding: 0 20px !important; font-size: 15px !important; border-radius: 14px !important; border: 3px solid white;}
+        .input-p-mini { width: 160px !important; height: 45px !important; padding: 0 10px !important; font-size: 14px !important; font-weight: 800; border-radius: 14px !important; border: 3px solid var(--blue-light) !important; margin: 0 !important; text-transform: uppercase; box-shadow: 0 4px 0 rgba(0,0,0,0.05);}
+        .btn-p-mini { margin: 0 !important; height: 45px; padding: 0 20px !important; font-size: 14px !important; border-radius: 14px !important; border: 3px solid white;}
+
+        /* NUEVO: HISTORIAL ATRACTIVO */
+        .caja-historial-container { background: #fff; border-radius: 20px; padding: 15px; border: 2px solid var(--border-color); margin-top: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.03); text-align: left;}
+        .caja-historial-container h3 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; color: var(--text-muted); text-align: center; font-weight: 900; letter-spacing: 1px; }
+        .historial { height: 120px; overflow-y: auto; padding-right: 5px; }
         
-        .input-l-mini { width: 55px !important; height: 50px !important; padding: 0 !important; font-size: 24px !important; font-weight: 900; border-radius: 16px !important; border: 3px solid var(--yellow-light) !important; margin: 0 !important; text-transform: uppercase; box-shadow: 0 4px 0 rgba(0,0,0,0.05);}
-        .btn-l-mini { margin: 0 !important; height: 50px; padding: 0 20px !important; font-size: 15px !important; border-radius: 50px !important; border: none !important; }
+        /* Scrollbar personalizado */
+        .historial::-webkit-scrollbar { width: 6px; }
+        .historial::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .historial::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        .input-p-mini { width: 160px !important; height: 45px !important; padding: 0 10px !important; font-size: 14px !important; font-weight: 800; border-radius: 16px !important; border: 3px solid var(--blue-light) !important; margin: 0 !important; text-transform: uppercase; box-shadow: 0 4px 0 rgba(0,0,0,0.05);}
-        .btn-p-mini { margin: 0 !important; height: 45px; padding: 0 20px !important; font-size: 14px !important; border-radius: 50px !important; border: none !important; }
+        /* Items del historial */
+        .log-item { padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; background: #f8fafc; color: var(--text-main); font-size: 12px; font-weight: 600; border-left: 4px solid var(--blue-light); display: flex; align-items: center; justify-content: space-between; }
+        .log-item b { font-family: monospace; font-size: 14px; color: var(--blue-dark); background: white; padding: 2px 6px; border-radius: 5px; border: 1px solid var(--border-color);}
+        .log-error { border-left-color: var(--pink-light); background: #fff1f2; }
+        .log-success { border-left-color: var(--success-color); background: #f0fdf4; }
 
         /* INFO INFERIOR */
-        .historial { background: #fff; border-radius: 16px; padding: 15px; height: 80px; overflow-y: auto; text-align: left; font-size: 12px; font-weight: 600; border: 2px solid var(--border-color); margin-top: 15px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
         .mis-secretos { background: #fff; border: 2px dashed var(--pink-light); border-radius: 20px; padding: 15px; margin-top: 20px; text-align: left; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.05);}
         .item-secreto { font-family: monospace; font-size: 15px; font-weight: 900; margin: 10px 0; padding: 10px 12px; background: #f8fafc; border-radius: 12px; border: 1px solid var(--border-color); }
         .original { font-size: 11px; color: var(--text-muted); display: block; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; font-family: 'Poppins', sans-serif; letter-spacing: normal; text-transform: uppercase;}
@@ -190,7 +203,10 @@
 
         <div id="zona-palabras"></div>
 
-        <div class="historial" id="historial"></div>
+        <div class="caja-historial-container">
+            <h3>📜 Historial de Jugadas</h3>
+            <div class="historial" id="historial"></div>
+        </div>
         
         <div class="mis-secretos" id="zona-mis-secretos">
             <h3 style="margin:0 0 15px 0; font-size:13px; text-transform:uppercase; color: var(--pink-dark); text-align:center; font-weight: 900;">Tus Palabras Secretas</h3>
@@ -281,7 +297,7 @@
             document.getElementById('timer-txt').innerText = `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
             if(s===10){ document.getElementById('reloj-visual').classList.add('reloj-urgente'); vibrate('aviso_10s'); }
             if(s<=3 && s>0) vibrate('aviso_3s');
-            if(s<=0){ clearInterval(timerInterval); vibrate('tiempo_agotado'); decideWinner(); }
+            if(s<=0){ clearInterval(timerInterval); vibrate('tiempo_agotado'); agregarLog("⏱️ ¡TIEMPO AGOTADO!"); decideWinner(); }
         }, 1000);
     }
 
@@ -350,6 +366,10 @@
 
     function sendAction(tipo, idx, val, acierto, obj) {
         if(obj.errL>=MAX_ERR_LETRA || obj.errP>=MAX_ERR_PALABRA) obj.fracasada=true;
+        
+        // AGREGAR AL HISTORIAL
+        agregarLog(`Tú probaste <b>${val}</b> en PAL ${idx+1} ➔ <span style="font-size:16px;">${acierto ? "✅" : "❌"}</span>`);
+
         let f='NADA'; const s = calcStats(progresoRival);
         if(numPalabras===1){ if(obj.resuelta) f='W'; else if(obj.fracasada) f='L'; else turnoActual=(turnoActual===1?2:1); }
         else { if(s.g >= Math.floor(numPalabras/2)+1 || s.t === numPalabras) f='C'; }
@@ -358,11 +378,30 @@
     }
 
     function procesarRival(d) {
+        // AGREGAR AL HISTORIAL DEL RIVAL
+        agregarLog(`Rival probó <b>${d.val}</b> en PAL ${d.idx+1} ➔ <span style="font-size:16px;">${d.acierto ? "✅" : "❌"}</span>`);
+
         let miP = estadoMisPalabras[d.idx]; if(d.fin==='C'||d.fin==='W'||d.fin==='L'){ decideWinner(); return; }
         if(d.acierto){ miP.adivinadas.push(...d.val.split('')); if(miP.secreto.split('').every(c=>miP.adivinadas.includes(c))) miP.resuelta=true; }
         miP.errL=d.s.errL; miP.errP=d.s.errP; if(miP.errL>=MAX_ERR_LETRA || miP.errP>=MAX_ERR_PALABRA) miP.fracasada=true;
         dibujarTablero(); if(numPalabras===1) turnoActual=miRol; updateUI();
     }
+
+    // --- NUEVA FUNCIÓN DE HISTORIAL ATRACTIVO ---
+    function agregarLog(t) { 
+        let d = document.createElement('div'); 
+        d.innerHTML = t; 
+        
+        let clase = 'log-item fade-in';
+        if (t.includes('❌') || t.includes('AGOTADO')) clase += ' log-error';
+        else if (t.includes('✅')) clase += ' log-success';
+        
+        d.className = clase;
+        let h = document.getElementById('historial'); 
+        h.appendChild(d); 
+        h.scrollTop = h.scrollHeight; 
+    }
+    // --------------------------------------------
 
     function calcStats(p) { return { g:p.filter(x=>x.resuelta).length, t:p.filter(x=>x.resuelta||x.fracasada).length, errL:p.reduce((a,b)=>a+b.errL,0), errP:p.reduce((a,b)=>a+b.errP,0) }; }
 
@@ -387,7 +426,6 @@
     function solicitarRevancha() { conn.send({tipo:'REMATCH_REQ'}); prepararRevancha(); }
     function prepararRevancha() { clearInterval(timerInterval); enJuegoActivo=false; document.querySelectorAll('.tarjeta, #pantalla-juego').forEach(e=>e.classList.add('oculto')); if(miRol===1){ document.getElementById('pantalla-host').classList.remove('oculto'); document.getElementById('host-paso1').classList.remove('oculto'); document.getElementById('host-paso2').classList.add('oculto'); } else { document.getElementById('pantalla-guest').classList.remove('oculto'); document.getElementById('guest-paso2').classList.remove('oculto'); document.getElementById('guest-inputs-palabras').innerHTML="<div style='padding:20px; background:#f8fafc; border-radius:16px; font-weight:800; color:var(--blue-dark); text-align:center;'>Host configurando...</div>"; document.getElementById('btn-guest-listo').classList.add('oculto'); } }
     
-    // --- MANEJO DE HISTORIAL (ATRAS) ---
     try { history.replaceState({p:'i'},"", ""); } catch(e){}
     window.addEventListener('popstate', ()=> { if (enJuegoActivo && turnoActual!==0){ if (confirm("¿Abandonar?")) location.reload(); else try { history.pushState({p:'j'},"","#j"); } catch(e){} } else location.reload(); });
 </script>
