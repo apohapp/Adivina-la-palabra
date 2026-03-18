@@ -316,13 +316,20 @@
             peer = new Peer('funword-'+r);
             peer.on('open', id => document.getElementById('mostrar-codigo').innerText = r);
             peer.on('connection', c => { 
-                conn = c; configMensajes(); 
-                if(modoJuego === 'clasico') {
-                    btnEspera.innerText="¡Rival Conectado! Iniciar"; btnEspera.disabled=false; 
-                } else {
-                    btnEspera.innerText="Rival conectado. Esperando que esté listo..."; btnEspera.disabled=true; 
-                }
+                conn = c; 
+                conn.on('open', () => {
+                    configMensajes();
+                    if(modoJuego === 'clasico') {
+                        btnEspera.innerText="¡Rival Conectado! Iniciar"; btnEspera.disabled=false; 
+                    } else {
+                        btnEspera.innerText="Rival conectado. Esperando su OK..."; btnEspera.disabled=true; 
+                    }
+                });
             });
+        } else {
+            // Re-setup if peer already exists
+            btnEspera.innerText="Esperando Conexión...";
+            btnEspera.disabled=true; 
         }
     }
 
@@ -344,7 +351,11 @@
         let c = document.getElementById('guest-codigo').value.toUpperCase(); if(!c) return; 
         document.getElementById('error-guest-conexion').innerText="Conectando..."; 
         conn = peer.connect('funword-'+c); 
-        conn.on('open', ()=>{ document.getElementById('error-guest-conexion').innerText=""; configMensajes();}); 
+        conn.on('open', ()=>{ 
+            document.getElementById('error-guest-conexion').innerText=""; 
+            configMensajes();
+            conn.send({tipo: 'REQ_HANDSHAKE', nombre: miNombre});
+        }); 
         peer.on('error', ()=> document.getElementById('error-guest-conexion').innerText="Sala no encontrada."); 
     }
 
@@ -364,11 +375,12 @@
     }
 
     function configMensajes() {
-        // Al conectar, el host manda el modo de juego
-        if (miRol === 1) conn.send({tipo: 'HANDSHAKE', modo: modoJuego, num: numPalabras, tiempo: tiempoMax, nombre: miNombre});
-
         conn.on('data', d => {
-            if(d.tipo==='HANDSHAKE' && miRol===2) {
+            if (d.tipo === 'REQ_HANDSHAKE' && miRol === 1) {
+                nombreRival = d.nombre;
+                conn.send({tipo: 'HANDSHAKE', modo: modoJuego, num: numPalabras, tiempo: tiempoMax, nombre: miNombre});
+            }
+            else if(d.tipo==='HANDSHAKE' && miRol===2) {
                 modoJuego = d.modo; numPalabras = d.num; tiempoMax = d.tiempo; nombreRival = d.nombre;
                 document.getElementById('guest-paso1').classList.add('oculto'); document.getElementById('guest-paso2').classList.remove('oculto');
                 
@@ -385,9 +397,10 @@
             }
             // HOST RECIBE ESTO EN MODO FRENÉTICO
             else if (d.tipo==='READY_FRENZY' && miRol===1) {
-                document.getElementById('btn-esperar').innerText="¡RIVAL LISTO! INICIAR FRENESÍ"; 
-                document.getElementById('btn-esperar').disabled=false;
-                document.getElementById('btn-esperar').onclick = () => { conn.send({tipo: 'START_FRENZY'}); startFrenzyCountdown(); };
+                let btn = document.getElementById('btn-esperar');
+                btn.innerText="¡RIVAL LISTO! INICIAR FRENESÍ"; 
+                btn.disabled=false;
+                btn.onclick = () => { conn.send({tipo: 'START_FRENZY'}); startFrenzyCountdown(); };
             }
             else if (d.tipo==='START_FRENZY' && miRol===2) {
                 startFrenzyCountdown();
@@ -491,7 +504,9 @@
         else if(ganador==="EMPATE"){ tit.innerText="¡DOBLE MUERTE SÚBITA! 💀💀"; playSound('lose'); vibrate('lose');}
         else { tit.innerText=`¡FUISTE FULMINADO! 💀`; playSound('lose'); vibrate('tiempo_agotado'); }
         document.getElementById('subtitulo-turno').innerText=msj; 
-        document.getElementById('zona-palabras').innerHTML = "<h3 style='color:var(--text-muted);'>No hubo partida...</h3>";
+        document.getElementById('zona-palabras').innerHTML = "<h3 style='color:var(--text-muted); margin-top:20px;'>No hubo partida...</h3>";
+        document.getElementById('zona-mis-secretos').classList.add('oculto');
+        document.querySelector('.caja-historial-container').classList.add('oculto');
     }
     // ----------------------------
 
@@ -572,7 +587,7 @@
             if(l){ l.disabled=!mio; pcomp.disabled=!mio; btns.forEach(b=>b.disabled=!mio); }
         });
         const m = document.getElementById('caja-marcador');
-        if(modoJuego==='frenetico' || numPalabras>1){ m.className="marcador carrera"; document.getElementById('titulo-turno').innerText="¡DUELO TOTAL!"; document.getElementById('subtitulo-turno').innerText="Adivina todo lo que puedas."; }
+        if(modoJuego==='frenetico' || numPalabras>1){ m.className="marcador carrera"; document.getElementById('titulo-turno').innerText="MODO DUELO"; document.getElementById('subtitulo-turno').innerText="¡Sé más rápido y preciso!"; }
         else { m.className="marcador"; if(mio){ document.getElementById('titulo-turno').innerText="¡TU TURNO!"; m.style.background="linear-gradient(135deg, var(--blue-light), var(--blue-dark))"; } else { document.getElementById('titulo-turno').innerText="TURNO RIVAL"; m.style.background="linear-gradient(135deg, var(--pink-light), var(--pink-dark))"; } }
     }
 
@@ -650,7 +665,7 @@
     }
 
     function solicitarRevancha() { conn.send({tipo:'REMATCH_REQ'}); prepararRevancha(); }
-    function prepararRevancha() { clearInterval(timerInterval); enJuegoActivo=false; document.querySelectorAll('.tarjeta, #pantalla-juego').forEach(e=>e.classList.add('oculto')); estadoFrenzyLocal=null; estadoFrenzyRival=null; miTableroListo=false; rivalTableroListo=false; if(miRol===1){ document.getElementById('pantalla-host').classList.remove('oculto'); document.getElementById('host-paso1').classList.remove('oculto'); document.getElementById('host-paso2').classList.add('oculto'); } else { document.getElementById('pantalla-guest').classList.remove('oculto'); document.getElementById('guest-paso1').classList.remove('oculto'); document.getElementById('guest-paso2').classList.add('oculto'); document.getElementById('guest-codigo').value=""; } }
+    function prepararRevancha() { clearInterval(timerInterval); enJuegoActivo=false; document.querySelectorAll('.tarjeta, #pantalla-juego').forEach(e=>e.classList.add('oculto')); estadoFrenzyLocal=null; estadoFrenzyRival=null; miTableroListo=false; rivalTableroListo=false; document.getElementById('zona-mis-secretos').classList.remove('oculto'); document.querySelector('.caja-historial-container').classList.remove('oculto'); if(miRol===1){ document.getElementById('pantalla-host').classList.remove('oculto'); document.getElementById('host-paso1').classList.remove('oculto'); document.getElementById('host-paso2').classList.add('oculto'); } else { document.getElementById('pantalla-guest').classList.remove('oculto'); document.getElementById('guest-paso1').classList.remove('oculto'); document.getElementById('guest-paso2').classList.add('oculto'); document.getElementById('guest-codigo').value=""; } }
     
     try { history.replaceState({p:'i'},"", ""); } catch(e){}
     window.addEventListener('popstate', ()=> { if (enJuegoActivo && turnoActual!==0){ if (confirm("¿Abandonar?")) location.reload(); else try { history.pushState({p:'j'},"","#j"); } catch(e){} } else location.reload(); });
