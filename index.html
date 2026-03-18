@@ -13,23 +13,178 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css">
-    
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            /* Paleta de Colores extraída del Logo */
+            --gold: #fabc00;
+            --gold-dark: #cc9b00;
+            --pink: #e92063;
+            --pink-dark: #b6003d;
+            --blue: #32a7e2;
+            --blue-dark: #007bb6;
+            --red-text: #f03f36;
+            
+            --bg-body: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #004586;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            text-align: center;
+            margin: 0;
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centrado vertical */
+            align-items: center;    /* Centrado horizontal */
+            box-sizing: border-box;
+        }
+
+        .oculto { display: none !important; }
+        .contenedor-principal { width: 100%; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+
+        /* Estilo Moneda (Coin-style) de la imagen */
+        .btn-coin, .slot-box, .btn-coin-round, input[type="text"] {
+            background: var(--bg-card);
+            border: 3px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1), inset 0 2px 0 rgba(255,255,255,0.2);
+            font-weight: 800;
+            color: var(--text-main);
+            box-sizing: border-box;
+            transition: transform 0.1s;
+        }
+
+        /* Input box estilizado como los botones */
+        input[type="text"] {
+            padding: 12px;
+            font-size: 16px;
+            text-align: center;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+            border-color: var(--border-color);
+            letter-spacing: normal;
+            font-weight: 400;
+        }
+        input[type="text"]:focus { outline: none; border-color: var(--blue); }
+
+        /* Botones Principales Estilo Moneda */
+        .btn-coin {
+            padding: 15px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .btn-coin:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+
+        /* Colores de Monedas específicos */
+        .btn-coin.gold, .slot-box.gold, .btn-coin-round.gold { border-color: var(--gold-dark); background-color: var(--gold); color: white; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+        .btn-coin.pink, .slot-box.pink, .btn-coin-round.pink { border-color: var(--pink-dark); background-color: var(--pink); color: white; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+        .btn-coin.blue, .slot-box.blue, .btn-coin-round.blue { border-color: var(--blue-dark); background-color: var(--blue); color: white; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+
+        /* --- PANTALLA INICIO --- */
+        #pantalla-inicio {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .logo-principal {
+            max-width: 80%;
+            max-height: 200px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        /* --- MARCADOR SUPERIOR (Replica la imagen) --- */
+        .marcador-superior {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            width: 100%;
+        }
+        .logo-min { max-height: 50px; }
+        .stats-left, .stats-right { flex: 1; text-align: left; }
+        .stats-right { text-align: right; }
+        .stat-item {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        .hearts-row { font-size: 16px; margin-right: 5px; }
+
+        /* --- TECLADO Y PALABRAS --- */
+        .contenedor-rayas { display: flex; gap: 4px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+        .slot-box { width: 30px; height: 42px; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; border-width: 3px; }
+
+        /* Botones del teclado (Replica los círculos de la imagen) */
+        .btn-letter {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            border-width: 3px;
+            font-size: 20px; font-weight: 800;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn-letter:active { transform: translateY(2px); }
+
+        /* --- FOOTER: HINT Y SKIP (Ubicación de la imagen) --- */
+        .game-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: 25px;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        .btn-coin-round {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        
+        .tarjeta-pwa { background: white; border-radius: 16px; padding: 20px; box-shadow: var(--shadow-subtle); border: 1px solid var(--border-color); width: 100%; box-sizing: border-box; margin-bottom: 15px; }
+        .msg-sys { color: var(--text-muted); font-style: italic; font-size: 12px; }
+    </style>
 </head>
 <body>
 
 <div class="contenedor-principal">
     
-    <div id="pantalla-inicio" class="pantalla-pwa">
-        <img src="icono.png" alt="Logo Game" class="logo-principal">
+    <div id="pantalla-inicio">
+        <img src="icono.png" alt="FUN Word Guessing Game" class="logo-principal">
+        
         <input type="text" id="input-nombre" placeholder="Escribe tu nombre" autocomplete="off">
+        
         <button onclick="mostrarHost()" class="btn-coin blue">Crear Sala (Host)</button>
         <button onclick="mostrarGuest()" class="btn-coin pink">Unirse a Sala</button>
     </div>
 
-    <div id="pantalla-juego" class="pantalla-pwa oculto">
+    <div id="pantalla-juego" class="oculto pantalla-pwa">
         
         <div class="marcador-superior">
             <div class="stats-left">
@@ -38,13 +193,13 @@
             </div>
             <img src="icono.png" alt="Game Logo" class="logo-min">
             <div class="stats-right">
-                <div class="stat-item"><span id="ui-lives" class="hearts-row">❤️❤️❤️</span>Lives</div>
+                <div class="stat-item"><span id="ui-lives" class="hearts-row">❤️❤️❤️❤️❤️</span>Lives</div>
                 <div class="stat-item"><span class="coin-icon gold"></span>Coins: <span id="ui-coins">0</span></div>
             </div>
         </div>
 
         <div class="zona-turnos tarjeta-pwa">
-            <h2 id="titulo-turno">Espera tu turno</h2>
+            <h2 id="titulo-turno" style="margin: 0;">Espera tu turno</h2>
             <p id="info-reconeccion" class="msg-sys oculto">Reconectando con rival...</p>
         </div>
 
@@ -59,7 +214,89 @@
 
 </div>
 
-<script src="script.js"></script>
+<script>
+    // PREVENIR CIERRES ACCIDENTALES / SUSPENSIÓN DE BACKGROUND
+    window.addEventListener('beforeunload', function (e) {
+        if (GameModel.miRol !== 0 && !document.getElementById('pantalla-juego').classList.contains('oculto')) {
+            e.preventDefault(); e.returnValue = '';
+        }
+    });
+
+    // --- MODELO DEL JUEGO (Datos) ---
+    const GameModel = {
+        peer: null, conn: null,
+        miRol: 0, miNombre: "Jugador", nombreRival: "Rival",
+        numPalabras: 1, turnoActual: 1,
+        
+        misPalabras: [], progresoRival: [],
+        
+        // Stats (Basado en la imagen)
+        stats: { score: 1250, level: 10, lives: 5, coins: 50 }
+    };
+
+    // --- CONFIGURACIONES ---
+    const MAX_ERR_LETRA = 10; const MAX_ERR_PALABRA = 3;
+
+    // --- VISTA (Manejo del DOM basado en el diseño) ---
+    const GameView = {
+        inputs: { nombre: () => document.getElementById('input-nombre') },
+        ui: {
+            score: () => document.getElementById('ui-score'),
+            level: () => document.getElementById('ui-level'),
+            lives: () => document.getElementById('ui-lives'),
+            coins: () => document.getElementById('ui-coins')
+        },
+        
+        actualizarStats: (stats) => {
+            GameView.ui.score().innerText = stats.score;
+            GameView.ui.level().innerText = stats.level;
+            GameView.ui.coins().innerText = stats.coins;
+            GameView.ui.lives().innerText = "❤️".repeat(stats.lives);
+        },
+        
+        dibujarRayasMultipalabra: (progreso) => {
+            let html = '';
+            progreso.forEach((p, i) => {
+                let colorClase = (i % 2 === 0) ? 'blue' : 'pink';
+                html += `
+                <div class="tarjeta-palabra tarjeta-pwa ${colorClase}">
+                    <div class="display-palabra">${p.adivinadas.join(' ')}</div>
+                    <div id="teclado-p${i}" class="contenedor-rayas"></div>
+                </div>`;
+            });
+            document.getElementById('zona-palabras-rival').innerHTML = html;
+        }
+    };
+
+    // --- CONTROLADOR (Lógica Multijugador y Juego) ---
+    const GameController = {
+        // Marcadores de posición para la lógica multijugador...
+        autoGuardarPartida: () => {
+            // ... lógica de auto-guardado ...
+        }
+    };
+
+    // Funciones globales vinculadas al HTML
+    function mostrarHost() {
+        // Redirige al flujo de hosteo...
+        document.getElementById('pantalla-inicio').classList.add('oculto');
+        document.getElementById('pantalla-juego').classList.remove('oculto');
+        GameView.actualizarStats(GameModel.stats); // Solo para la demo
+    }
+    
+    function mostrarGuest() {
+        // Redirige al flujo de guest...
+        document.getElementById('pantalla-inicio').classList.add('oculto');
+        document.getElementById('pantalla-juego').classList.remove('oculto');
+        GameView.actualizarStats(GameModel.stats); // Solo para la demo
+    }
+
+    // Inicialización al cargar
+    window.addEventListener('load', () => {
+        GameView.actualizarStats(GameModel.stats);
+    });
+
+</script>
 
 <script>
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
