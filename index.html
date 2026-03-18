@@ -86,10 +86,12 @@
         /* CONTROLES COMPACTOS */
         .panel-mando { background: #f1f5f9; padding: 15px; border-radius: 20px; border: 2px dashed #cbd5e1; display: flex; flex-direction: column; gap: 12px; align-items: center; }
         .fila-mando { display: flex; gap: 8px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; }
+        
         .input-l-mini { width: 55px !important; height: 50px !important; padding: 0 !important; font-size: 24px !important; font-weight: 900; border-radius: 14px !important; border: 3px solid var(--yellow-light) !important; margin: 0 !important; text-transform: uppercase; box-shadow: 0 4px 0 rgba(0,0,0,0.05);}
-        .btn-l-mini { margin: 0 !important; height: 50px; padding: 0 20px !important; font-size: 15px !important; border-radius: 14px !important; border: 3px solid white;}
+        .btn-l-mini { margin: 0 !important; height: 50px; padding: 0 20px !important; font-size: 15px !important; border-radius: 50px !important; border: none !important; }
+        
         .input-p-mini { width: 160px !important; height: 45px !important; padding: 0 10px !important; font-size: 14px !important; font-weight: 800; border-radius: 14px !important; border: 3px solid var(--blue-light) !important; margin: 0 !important; text-transform: uppercase; box-shadow: 0 4px 0 rgba(0,0,0,0.05);}
-        .btn-p-mini { margin: 0 !important; height: 45px; padding: 0 20px !important; font-size: 14px !important; border-radius: 14px !important; border: 3px solid white;}
+        .btn-p-mini { margin: 0 !important; height: 45px; padding: 0 20px !important; font-size: 14px !important; border-radius: 50px !important; border: none !important; }
 
         /* NUEVO: HISTORIAL ATRACTIVO */
         .caja-historial-container { background: #fff; border-radius: 20px; padding: 15px; border: 2px solid var(--border-color); margin-top: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.03); text-align: left;}
@@ -367,7 +369,6 @@
     function sendAction(tipo, idx, val, acierto, obj) {
         if(obj.errL>=MAX_ERR_LETRA || obj.errP>=MAX_ERR_PALABRA) obj.fracasada=true;
         
-        // AGREGAR AL HISTORIAL
         agregarLog(`Tú probaste <b>${val}</b> en PAL ${idx+1} ➔ <span style="font-size:16px;">${acierto ? "✅" : "❌"}</span>`);
 
         let f='NADA'; const s = calcStats(progresoRival);
@@ -378,7 +379,6 @@
     }
 
     function procesarRival(d) {
-        // AGREGAR AL HISTORIAL DEL RIVAL
         agregarLog(`Rival probó <b>${d.val}</b> en PAL ${d.idx+1} ➔ <span style="font-size:16px;">${d.acierto ? "✅" : "❌"}</span>`);
 
         let miP = estadoMisPalabras[d.idx]; if(d.fin==='C'||d.fin==='W'||d.fin==='L'){ decideWinner(); return; }
@@ -387,21 +387,17 @@
         dibujarTablero(); if(numPalabras===1) turnoActual=miRol; updateUI();
     }
 
-    // --- NUEVA FUNCIÓN DE HISTORIAL ATRACTIVO ---
     function agregarLog(t) { 
         let d = document.createElement('div'); 
         d.innerHTML = t; 
-        
         let clase = 'log-item fade-in';
         if (t.includes('❌') || t.includes('AGOTADO')) clase += ' log-error';
         else if (t.includes('✅')) clase += ' log-success';
-        
         d.className = clase;
         let h = document.getElementById('historial'); 
         h.appendChild(d); 
         h.scrollTop = h.scrollHeight; 
     }
-    // --------------------------------------------
 
     function calcStats(p) { return { g:p.filter(x=>x.resuelta).length, t:p.filter(x=>x.resuelta||x.fracasada).length, errL:p.reduce((a,b)=>a+b.errL,0), errP:p.reduce((a,b)=>a+b.errP,0) }; }
 
