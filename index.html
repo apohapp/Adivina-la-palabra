@@ -36,7 +36,7 @@
         .btn-pink { background-color: var(--pink-light); box-shadow: 0 5px 0px var(--pink-dark); text-shadow: 1px 1px 0px var(--pink-dark); }
         .btn-yellow { background-color: var(--yellow-light); box-shadow: 0 5px 0px var(--yellow-dark); text-shadow: 1px 1px 0px var(--yellow-dark); color: #fff; }
 
-        input[type="text"], input[type="number"], select { padding: 12px; font-size: 16px; border-radius: 12px; border: 2px solid var(--border-color); width: 100%; max-width: 300px; box-sizing: border-box; font-family: 'Poppins', sans-serif; text-align: center; margin: 5px; outline: none; transition: 0.2s; }
+        input[type="text"], input[type="number"], select { padding: 12px; font-size: 16px; border-radius: 12px; border: 2px solid var(--border-color); width: 100%; box-sizing: border-box; font-family: 'Poppins', sans-serif; text-align: center; margin: 5px 0; outline: none; transition: 0.2s; }
         input:focus { border-color: var(--blue-light); box-shadow: 0 0 8px rgba(46, 180, 230, 0.3); }
 
         .fila-inicio { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; width: 100%; margin-bottom: 20px; }
@@ -53,8 +53,8 @@
         .tarjeta-palabra.resuelta { border-color: #10b981; background-color: #f0fdf4; }
         .tarjeta-palabra.fracasada { border-color: var(--pink-dark); background-color: #fff0f5; opacity: 0.8; }
         
-        .display-palabra { font-family: monospace; font-size: 32px; font-weight: 900; letter-spacing: 8px; text-align: center; margin: 20px 0; color: var(--text-main); }
-        .estadisticas { display: flex; justify-content: space-around; font-size: 13px; font-weight: 700; color: var(--text-muted); background: #f1f5f9; padding: 10px; border-radius: 10px; margin-bottom: 15px;}
+        .display-palabra { font-family: monospace; font-size: 32px; font-weight: 900; letter-spacing: 8px; text-align: center; margin: 10px 0 20px 0; color: var(--text-main); }
+        .estadisticas { display: flex; justify-content: space-around; font-size: 13px; font-weight: 700; color: var(--text-muted); background: #f1f5f9; padding: 10px; border-radius: 10px; margin-bottom: 10px;}
         .err-peligro { color: var(--pink-light); }
 
         .controles-adivinar { display: flex; flex-direction: column; gap: 10px; align-items: center; }
@@ -63,10 +63,12 @@
 
         .historial { background: #f8fafc; border-radius: 12px; padding: 15px; height: 120px; overflow-y: auto; text-align: left; font-size: 13px; border: 2px solid var(--border-color); margin-top: 15px; }
         
-        /* NUEVA SECCIÓN: MIS SECRETOS */
         .mis-secretos { background: #fff0f5; border: 2px dashed var(--pink-light); border-radius: 12px; padding: 15px; margin-top: 15px; text-align: center;}
         .mis-secretos h3 { color: var(--pink-dark); margin: 0 0 10px 0; font-size: 16px; text-transform: uppercase;}
         .item-secreto { font-family: monospace; font-size: 18px; font-weight: bold; letter-spacing: 3px; margin: 8px 0; padding: 5px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
+        
+        .caja-input-pista { background: #f8fafc; border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; margin-bottom: 15px; width: 100%; max-width: 320px; box-sizing: border-box; }
+        .texto-pista { font-size: 14px; color: var(--blue-dark); font-weight: 600; background: #e0f2fe; padding: 8px; border-radius: 8px; margin-top: 10px; font-style: italic;}
     </style>
 </head>
 <body>
@@ -102,7 +104,7 @@
             <div class="codigo-sala" id="mostrar-codigo">...</div>
             <hr style="border: 1px solid var(--border-color); margin: 20px 0;">
             <h3 style="color: var(--text-main);">Escribe tus Palabras Secretas</h3>
-            <div id="host-inputs-palabras" style="display:flex; flex-direction:column; align-items:center;"></div>
+            <div id="host-inputs-palabras" style="display:flex; flex-direction:column; align-items:center; width: 100%;"></div>
             <p id="error-host" class="alerta"></p>
             <button id="btn-esperar" onclick="hostGuardarPalabras()" class="btn-blue" disabled>Esperando al rival...</button>
         </div>
@@ -122,14 +124,13 @@
             <p style="font-weight: 700;">Jugaremos con <span id="guest-mostrar-num" style="color: var(--blue-light); font-size: 20px;"></span> palabras.</p>
             <hr style="border: 1px solid var(--border-color); margin: 20px 0;">
             <h3 style="color: var(--text-main);">Escribe tus Palabras Secretas</h3>
-            <div id="guest-inputs-palabras" style="display:flex; flex-direction:column; align-items:center;"></div>
+            <div id="guest-inputs-palabras" style="display:flex; flex-direction:column; align-items:center; width: 100%;"></div>
             <p id="error-guest" class="alerta"></p>
             <button onclick="guestGuardarPalabras()" class="btn-blue">¡Listo para Jugar!</button>
         </div>
     </div>
 
     <div id="pantalla-juego" class="oculto">
-        
         <div class="marcador" id="caja-marcador">
             <h2 id="titulo-turno">Espera tu turno</h2>
             <p id="subtitulo-turno" style="font-size: 14px; margin-top: 5px; font-weight: 600;">Conectando jugadores...</p>
@@ -155,29 +156,36 @@
     let miRol = 0; let miNombre = "Jugador"; let nombreRival = "Rival";
     let numPalabras = 1; let turnoActual = 1;
     let misPalabras = []; let progresoRival = []; 
-    
-    // NUEVO: Array para rastrear el progreso de mis propias palabras
     let estadoMisPalabras = []; 
     
     const MAX_ERR_LETRA = 10; const MAX_ERR_PALABRA = 3;
 
     function guardarNombre() { let n = document.getElementById('input-nombre').value.trim(); if(n) miNombre = n; }
     
+    // MODIFICADO: Ahora genera cuadro de palabra y pista juntos
     function generarInputs(contenedorId, cantidad) {
         let html = '';
         for(let i=0; i<cantidad; i++) {
-            html += `<input type="text" id="${contenedorId}-p${i}" placeholder="Palabra ${i+1}" autocomplete="off" style="text-transform: uppercase; font-weight: bold; letter-spacing: 2px;">`;
+            html += `
+            <div class="caja-input-pista">
+                <input type="text" id="${contenedorId}-p${i}" placeholder="Palabra Secreta ${i+1}" autocomplete="off" style="text-transform: uppercase; font-weight: bold; letter-spacing: 2px;">
+                <input type="text" id="${contenedorId}-hint${i}" placeholder="💡 Pista para tu rival (Opcional)" autocomplete="off" style="font-size: 13px;">
+            </div>`;
         }
         document.getElementById(contenedorId).innerHTML = html;
     }
 
+    // MODIFICADO: Lee la palabra y la pista
     function leerYValidarInputs(contenedorId, cantidad, errorId) {
         let palabras = []; let err = document.getElementById(errorId);
         for(let i=0; i<cantidad; i++) {
             let p = document.getElementById(`${contenedorId}-p${i}`).value.trim().toUpperCase();
+            let hint = document.getElementById(`${contenedorId}-hint${i}`).value.trim();
             if(p.length < 3) { err.innerText = `La Palabra ${i+1} debe tener al menos 3 letras.`; return null; }
             if(/\s/.test(p)) { err.innerText = `La Palabra ${i+1} no debe contener espacios.`; return null; }
-            palabras.push(p);
+            
+            // Guardamos un objeto con ambas cosas
+            palabras.push({ palabra: p, pista: hint });
         }
         err.innerText = ""; return palabras;
     }
@@ -237,18 +245,22 @@
         });
     }
 
+    // MODIFICADO: Lee la palabra y la pista desde el objeto
     function iniciarProgresoLocal(palabrasRival) {
-        progresoRival = palabrasRival.map(p => { return { secreto: p, adivinadas: [p.charAt(0), p.charAt(p.length - 1)], errLetra: 0, errPalabra: 0, resuelta: false, fracasada: false }; });
+        progresoRival = palabrasRival.map(p => { 
+            return { secreto: p.palabra, pista: p.pista, adivinadas: [p.palabra.charAt(0), p.palabra.charAt(p.palabra.length - 1)], errLetra: 0, errPalabra: 0, resuelta: false, fracasada: false }; 
+        });
         
-        // Inicializar el progreso de MIS palabras
-        estadoMisPalabras = misPalabras.map(p => { return { secreto: p, adivinadas: [p.charAt(0), p.charAt(p.length - 1)], resuelta: false, fracasada: false }; });
+        estadoMisPalabras = misPalabras.map(p => { 
+            return { secreto: p.palabra, adivinadas: [p.palabra.charAt(0), p.palabra.charAt(p.palabra.length - 1)], resuelta: false, fracasada: false }; 
+        });
     }
 
     function iniciarTablero() {
         document.getElementById('pantalla-host').classList.add('oculto'); document.getElementById('pantalla-guest').classList.add('oculto');
         document.getElementById('pantalla-juego').classList.remove('oculto');
         dibujarTarjetasPalabras(); 
-        dibujarMisSecretos(); // Dibuja mi panel
+        dibujarMisSecretos(); 
         actualizarTurnoUI();
         agregarLog(`🏁 Partida iniciada contra ${nombreRival}.`);
     }
@@ -260,7 +272,7 @@
         return display.trim();
     }
 
-    // DIBUJAR LO QUE YO ADIVINO
+    // MODIFICADO: Agrega la vista de la pista en la tarjeta
     function dibujarTarjetasPalabras() {
         let html = '';
         progresoRival.forEach((p, index) => {
@@ -269,6 +281,9 @@
             let checkL = p.errLetra >= MAX_ERR_LETRA * 0.7 ? 'err-peligro' : ''; let checkP = p.errPalabra >= MAX_ERR_PALABRA - 1 ? 'err-peligro' : '';
             let claseExtra = esResuelta ? 'resuelta' : (esFracasada ? 'fracasada' : '');
             let iconoTop = esResuelta ? '✅' : (esFracasada ? '❌' : '');
+            
+            // Genera el HTML de la pista solo si escribieron algo
+            let htmlPista = p.pista ? `<div class="texto-pista">💡 Pista: ${p.pista}</div>` : '';
 
             html += `
             <div class="tarjeta-palabra ${claseExtra}">
@@ -277,6 +292,7 @@
                     <span class="${checkL}">Errores Letra: ${p.errLetra}/${MAX_ERR_LETRA}</span>
                     <span class="${checkP}">Errores Palabra: ${p.errPalabra}/${MAX_ERR_PALABRA}</span>
                 </div>
+                ${htmlPista}
                 <div class="display-palabra">${displayStr}</div>
                 <div class="controles-adivinar ${(esResuelta || esFracasada) ? 'oculto' : ''}" id="controles-p${index}">
                     <div class="fila-control">
@@ -294,11 +310,9 @@
         document.getElementById('zona-palabras').innerHTML = html;
     }
 
-    // NUEVO: DIBUJAR MIS SECRETOS (Lo que el rival adivina)
     function dibujarMisSecretos() {
         let html = '';
         estadoMisPalabras.forEach((p, i) => {
-            // Reconstruye cómo se ve la palabra para el rival en este momento
             let display = p.secreto.split('').map(c => (p.adivinadas.includes(c) || p.resuelta || p.fracasada) ? c : '_').join(' ');
             let color = p.resuelta ? '#10b981' : (p.fracasada ? 'var(--pink-light)' : 'var(--text-main)');
             let icono = p.resuelta ? '✅' : (p.fracasada ? '❌' : '⏳');
@@ -314,127 +328,3 @@
 
         progresoRival.forEach((p, i) => {
             let iL = document.getElementById(`input-letra-${i}`); let iP = document.getElementById(`input-palabra-${i}`);
-            let btns = document.querySelectorAll(`#controles-p${i} button`);
-            if(iL) { iL.disabled = !esMiTurno; iP.disabled = !esMiTurno; btns.forEach(b => b.disabled = !esMiTurno); }
-        });
-
-        if (numPalabras > 1) {
-            marcador.className = "marcador carrera";
-            titulo.innerText = "¡CARRERA ACTIVADA!"; subtitulo.innerText = "Adivina tus palabras lo más rápido que puedas.";
-        } else {
-            marcador.className = "marcador";
-            if (esMiTurno) { titulo.innerText = "¡Es tu turno!"; subtitulo.innerText = "Adivina una letra o la palabra completa."; marcador.style.backgroundColor = "var(--blue-light)"; } 
-            else { titulo.innerText = `Turno de ${nombreRival}`; subtitulo.innerText = "Esperando jugada..."; marcador.style.backgroundColor = "var(--pink-light)";}
-        }
-    }
-
-    function intentarLetra(index) {
-        let obj = progresoRival[index]; let input = document.getElementById(`input-letra-${index}`); let errUI = document.getElementById(`err-ui-${index}`);
-        let letra = input.value.trim().toUpperCase(); input.value = ""; errUI.innerText = "";
-        if(!letra || !/^[A-ZÑ]$/.test(letra)) return errUI.innerText = "Ingresa una letra válida.";
-        if(obj.adivinadas.includes(letra)) return errUI.innerText = "Esa letra ya está revelada.";
-        let acierto = obj.secreto.includes(letra);
-        if(acierto) { obj.adivinadas.push(letra); if(obj.secreto.split('').every(c => obj.adivinadas.includes(c))) obj.resuelta = true; } 
-        else { obj.errLetra++; }
-        enviarYProcesarLocal('LETRA', index, letra, acierto, obj);
-    }
-
-    function intentarPalabra(index) {
-        let obj = progresoRival[index]; let input = document.getElementById(`input-palabra-${index}`); let errUI = document.getElementById(`err-ui-${index}`);
-        let intento = input.value.trim().toUpperCase(); input.value = ""; errUI.innerText = "";
-        if(intento.length < 3) return errUI.innerText = "Escribe una palabra completa.";
-        let acierto = (intento === obj.secreto);
-        if(acierto) obj.resuelta = true; else obj.errPalabra++;
-        enviarYProcesarLocal('PALABRA', index, intento, acierto, obj);
-    }
-
-    function enviarYProcesarLocal(tipo, index, valor, acierto, obj) {
-        let perdioPalabra = (obj.errLetra >= MAX_ERR_LETRA || obj.errPalabra >= MAX_ERR_PALABRA);
-        let ganoPalabra = obj.resuelta;
-        let finMensaje = 'NADA';
-
-        agregarLog(`Intentaste la ${tipo.toLowerCase()} <b>${valor}</b> en Pal. ${index+1} ➔ ${acierto ? "✅" : "❌"}`);
-
-        if (numPalabras === 1) {
-            if (perdioPalabra) { finMensaje = 'DERROTA'; terminarJuego(nombreRival, "Alcanzaste el límite de errores."); }
-            else if (ganoPalabra) { finMensaje = 'VICTORIA'; terminarJuego(miNombre, "¡Adivinaste la palabra!"); }
-            else { turnoActual = (turnoActual === 1) ? 2 : 1; }
-        } else {
-            if (perdioPalabra) { obj.fracasada = true; finMensaje = 'PALABRA_PERDIDA'; } 
-            else if (ganoPalabra) { finMensaje = 'PALABRA_GANADA'; }
-
-            let misPuntos = progresoRival.filter(p => p.resuelta).length;
-            let misFracasos = progresoRival.filter(p => p.fracasada).length;
-            let targetWin = Math.floor(numPalabras / 2) + 1; 
-
-            if (misPuntos >= targetWin) {
-                finMensaje = 'VICTORIA_TOTAL'; terminarJuego(miNombre, "¡Alcanzaste la mayoría de aciertos!");
-            } else if ((numPalabras - misFracasos) < targetWin) {
-                finMensaje = 'DERROTA_MATEMATICA'; terminarJuego(nombreRival, "Perdiste demasiadas palabras. Imposible ganar.");
-            }
-        }
-
-        conn.send({ tipo: 'ACCION', accion: tipo, idx: index, val: valor, acierto: acierto, fin: finMensaje });
-        dibujarTarjetasPalabras(); actualizarTurnoUI();
-    }
-
-    function procesarAccionRival(datos) {
-        agregarLog(`El Rival intentó <b>${datos.val}</b> en tu Pal. ${datos.idx+1} ➔ ${datos.acierto ? "✅" : "❌"}`);
-        
-        // ACTUALIZAR MI PANEL DE SECRETOS
-        let miPalabra = estadoMisPalabras[datos.idx];
-        if (datos.accion === 'LETRA' && datos.acierto) miPalabra.adivinadas.push(datos.val);
-        if (datos.accion === 'PALABRA' && datos.acierto) miPalabra.resuelta = true; // Si adivina la palabra completa
-        if (datos.fin === 'PALABRA_PERDIDA' || datos.fin === 'DERROTA') miPalabra.fracasada = true;
-        if (datos.fin === 'PALABRA_GANADA' || datos.fin === 'VICTORIA') miPalabra.resuelta = true;
-        dibujarMisSecretos();
-
-        // RESULTADOS GLOBALES (Impacto Visual Sincronizado)
-        if(datos.fin === 'DERROTA') { terminarJuego(miNombre, `El rival alcanzó el límite de errores.`); return; }
-        if(datos.fin === 'VICTORIA') { terminarJuego(nombreRival, `El rival adivinó tu palabra.`); return; }
-        if(datos.fin === 'VICTORIA_TOTAL') { terminarJuego(nombreRival, `El rival alcanzó la mayoría primero.`); return; }
-        if(datos.fin === 'DERROTA_MATEMATICA') { terminarJuego(miNombre, `El rival perdió demasiadas palabras.`); return; }
-
-        if(numPalabras === 1) { turnoActual = miRol; actualizarTurnoUI(); }
-    }
-
-    // NUEVO: FUNCIÓN TERMINAR JUEGO (Con impacto visual fuerte)
-    function terminarJuego(ganador, mensaje) {
-        let marcador = document.getElementById('caja-marcador');
-        let titulo = document.getElementById('titulo-turno');
-        let subtitulo = document.getElementById('subtitulo-turno');
-        
-        // Esconder la zona de juego para que el aviso sea inmenso y claro
-        document.getElementById('zona-palabras').classList.add('oculto');
-        
-        marcador.className = "marcador"; // Quita la clase carrera si la tuviera
-        if (ganador === miNombre) {
-            titulo.innerText = "¡GANASTE! 🎉";
-            marcador.style.backgroundColor = "#10b981"; // Verde victoria
-            confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
-        } else {
-            titulo.innerText = `¡GANÓ ${nombreRival.toUpperCase()}! 😔`;
-            marcador.style.backgroundColor = "var(--pink-dark)"; // Rojo/Rosa oscuro derrota
-        }
-        
-        titulo.style.fontSize = "36px"; // Letra gigante
-        titulo.style.textShadow = "2px 2px 0 rgba(0,0,0,0.3)";
-        subtitulo.innerText = mensaje;
-        subtitulo.style.fontSize = "16px";
-        subtitulo.style.color = "white";
-        
-        turnoActual = 0; // Bloquea todo
-    }
-
-    function agregarLog(texto) {
-        let div = document.createElement('div'); div.innerHTML = texto; div.style.marginBottom = "6px";
-        let hist = document.getElementById('historial'); hist.appendChild(div); hist.scrollTop = hist.scrollHeight;
-    }
-</script>
-
-<script>
-    if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('./sw.js'); }); }
-</script>
-
-</body>
-</html>
