@@ -7,299 +7,365 @@
     
     <meta name="theme-color" content="#ffffff">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="white-translucent">
     <link rel="manifest" href="manifest.json">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         :root {
-            /* Paleta de Colores extraída del Logo */
-            --gold: #fabc00;
-            --gold-dark: #cc9b00;
-            --pink: #e92063;
-            --pink-dark: #b6003d;
-            --blue: #32a7e2;
-            --blue-dark: #007bb6;
-            --red-text: #f03f36;
-            
-            --bg-body: #ffffff;
-            --bg-card: #ffffff;
+            /* Colores extraídos de tu logo */
+            --blue-light: #2eb4e6;
+            --blue-dark: #0082ba;
+            --pink-light: #f0256e;
+            --pink-dark: #b5003f;
+            --yellow-light: #fcd028;
+            --yellow-dark: #d69e00;
             --text-main: #004586;
-            --text-muted: #64748b;
+            --bg-body: #ffffff;
             --border-color: #e2e8f0;
-            --shadow-subtle: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            text-align: center;
-            margin: 0;
-            padding: 15px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* Centrado vertical */
-            align-items: center;    /* Centrado horizontal */
-            box-sizing: border-box;
-        }
-
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); text-align: center; margin: 0; padding: 20px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
         .oculto { display: none !important; }
-        .contenedor-principal { width: 100%; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+        .contenedor { width: 100%; max-width: 700px; }
 
-        /* Estilo Moneda (Coin-style) de la imagen */
-        .btn-coin, .slot-box, .btn-coin-round, input[type="text"] {
-            background: var(--bg-card);
-            border: 3px solid var(--border-color);
-            border-radius: 20px;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1), inset 0 2px 0 rgba(255,255,255,0.2);
+        /* ESTILO DEL LOGO */
+        .logo-img { max-height: 120px; margin-bottom: 20px; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+        
+        /* ESTILO DE BOTONES (Como en tu imagen) */
+        button {
+            border: 3px solid white;
+            border-radius: 25px;
+            padding: 12px 24px;
+            font-size: 16px;
             font-weight: 800;
-            color: var(--text-main);
-            box-sizing: border-box;
-            transition: transform 0.1s;
-        }
-
-        /* Input box estilizado como los botones */
-        input[type="text"] {
-            padding: 12px;
-            font-size: 16px;
-            text-align: center;
-            width: 100%;
-            max-width: 300px;
-            margin-bottom: 20px;
-            border-color: var(--border-color);
-            letter-spacing: normal;
-            font-weight: 400;
-        }
-        input[type="text"]:focus { outline: none; border-color: var(--blue); }
-
-        /* Botones Principales Estilo Moneda */
-        .btn-coin {
-            padding: 15px 25px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            width: 100%;
-            max-width: 300px;
-        }
-        .btn-coin:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
-
-        /* Colores de Monedas específicos */
-        .btn-coin.gold, .slot-box.gold, .btn-coin-round.gold { border-color: var(--gold-dark); background-color: var(--gold); color: white; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
-        .btn-coin.pink, .slot-box.pink, .btn-coin-round.pink { border-color: var(--pink-dark); background-color: var(--pink); color: white; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
-        .btn-coin.blue, .slot-box.blue, .btn-coin-round.blue { border-color: var(--blue-dark); background-color: var(--blue); color: white; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
-
-        /* --- PANTALLA INICIO --- */
-        #pantalla-inicio {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-        .logo-principal {
-            max-width: 80%;
-            max-height: 200px;
-            margin-bottom: 30px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-        }
-
-        /* --- MARCADOR SUPERIOR (Replica la imagen) --- */
-        .marcador-superior {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding: 10px 0;
-            width: 100%;
-        }
-        .logo-min { max-height: 50px; }
-        .stats-left, .stats-right { flex: 1; text-align: left; }
-        .stats-right { text-align: right; }
-        .stat-item {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin-bottom: 5px;
-        }
-        .hearts-row { font-size: 16px; margin-right: 5px; }
-
-        /* --- TECLADO Y PALABRAS --- */
-        .contenedor-rayas { display: flex; gap: 4px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
-        .slot-box { width: 30px; height: 42px; font-size: 22px; font-weight: 800; display: flex; align-items: center; justify-content: center; border-width: 3px; }
-
-        /* Botones del teclado (Replica los círculos de la imagen) */
-        .btn-letter {
-            width: 42px; height: 42px;
-            border-radius: 50%;
-            border-width: 3px;
-            font-size: 20px; font-weight: 800;
             color: white;
             cursor: pointer;
-            transition: transform 0.1s;
+            box-shadow: 0 5px 0px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            margin: 5px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
-        .btn-letter:active { transform: translateY(2px); }
+        button:active { transform: translateY(4px); box-shadow: 0 1px 0px rgba(0,0,0,0.2); }
+        button:disabled { filter: grayscale(100%); cursor: not-allowed; transform: none; box-shadow: none; }
 
-        /* --- FOOTER: HINT Y SKIP (Ubicación de la imagen) --- */
-        .game-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-top: 25px;
-            padding: 0 10px;
-            box-sizing: border-box;
+        .btn-blue { background-color: var(--blue-light); box-shadow: 0 5px 0px var(--blue-dark); text-shadow: 1px 1px 0px var(--blue-dark); }
+        .btn-pink { background-color: var(--pink-light); box-shadow: 0 5px 0px var(--pink-dark); text-shadow: 1px 1px 0px var(--pink-dark); }
+        .btn-yellow { background-color: var(--yellow-light); box-shadow: 0 5px 0px var(--yellow-dark); text-shadow: 1px 1px 0px var(--yellow-dark); color: #fff; }
+
+        /* INPUTS */
+        input[type="text"], input[type="number"], select {
+            padding: 12px; font-size: 16px; border-radius: 12px; border: 2px solid var(--border-color); width: 100%; max-width: 300px; box-sizing: border-box; font-family: 'Poppins', sans-serif; text-align: center; margin: 5px; outline: none; transition: 0.2s;
         }
-        .btn-coin-round {
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            font-size: 16px;
-            font-weight: 800;
-            cursor: pointer;
-        }
+        input:focus { border-color: var(--blue-light); box-shadow: 0 0 8px rgba(46, 180, 230, 0.3); }
+
+        /* ALINEACIÓN DE LA PANTALLA INICIAL (Como tu imagen) */
+        .fila-inicio { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; width: 100%; margin-bottom: 20px; }
         
-        .tarjeta-pwa { background: white; border-radius: 16px; padding: 20px; box-shadow: var(--shadow-subtle); border: 1px solid var(--border-color); width: 100%; box-sizing: border-box; margin-bottom: 15px; }
-        .msg-sys { color: var(--text-muted); font-style: italic; font-size: 12px; }
+        .tarjeta { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.08); border: 2px solid var(--border-color); margin-bottom: 20px; }
+        
+        .codigo-sala { font-family: monospace; font-size: 32px; font-weight: 900; color: var(--pink-light); background: #fff0f5; padding: 15px; border-radius: 12px; letter-spacing: 6px; border: 2px dashed var(--pink-light); display: inline-block; margin: 15px 0;}
+        .alerta { color: var(--pink-light); font-size: 14px; font-weight: 700; margin: 5px 0; min-height: 20px; }
+
+        /* ZONA DE JUEGO */
+        .marcador { background: var(--blue-light); color: white; padding: 15px; border-radius: 15px; box-shadow: 0 6px 0 var(--blue-dark); margin-bottom: 25px; border: 2px solid white; }
+        .marcador h2 { margin: 0; font-size: 22px; text-shadow: 1px 1px 0 var(--blue-dark); }
+        
+        .tarjeta-palabra { background: white; border: 3px solid var(--border-color); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 6px 12px rgba(0,0,0,0.05); }
+        .tarjeta-palabra.resuelta { border-color: #10b981; background-color: #f0fdf4; }
+        
+        .display-palabra { font-family: monospace; font-size: 32px; font-weight: 900; letter-spacing: 8px; text-align: center; margin: 20px 0; color: var(--text-main); }
+        .estadisticas { display: flex; justify-content: space-around; font-size: 13px; font-weight: 700; color: var(--text-muted); background: #f1f5f9; padding: 10px; border-radius: 10px; margin-bottom: 15px;}
+        .err-peligro { color: var(--pink-light); }
+
+        .controles-adivinar { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .fila-control { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; flex-wrap: wrap;}
+        .input-letra { width: 70px !important; text-transform: uppercase; font-weight: 900; font-size: 24px !important; }
+
+        .historial { background: #f8fafc; border-radius: 12px; padding: 15px; height: 150px; overflow-y: auto; text-align: left; font-size: 13px; border: 2px solid var(--border-color); margin-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="contenedor-principal">
-    
-    <div id="pantalla-inicio">
-        <img src="icono.png" alt="FUN Word Guessing Game" class="logo-principal">
-        
-        <input type="text" id="input-nombre" placeholder="Escribe tu nombre" autocomplete="off">
-        
-        <button onclick="mostrarHost()" class="btn-coin blue">Crear Sala (Host)</button>
-        <button onclick="mostrarGuest()" class="btn-coin pink">Unirse a Sala</button>
+<div class="contenedor">
+
+    <div id="pantalla-inicio" class="tarjeta" style="border: none; box-shadow: none;">
+        <div class="fila-inicio">
+            <img src="icono-512.jpg" alt="Logo Game" class="logo-img" onerror="this.src='icono.png'">
+            
+            <input type="text" id="input-nombre" placeholder="Escribe tu nombre" autocomplete="off" style="margin: 0; max-width: 200px;">
+            
+            <button onclick="mostrarHost()" class="btn-blue">Crear Sala (Host)</button>
+            <button onclick="mostrarGuest()" class="btn-pink">Unirse a Sala</button>
+        </div>
     </div>
 
-    <div id="pantalla-juego" class="oculto pantalla-pwa">
+    <div id="pantalla-host" class="tarjeta oculto">
+        <div id="host-paso1">
+            <h2 style="color: var(--blue-light);">Configurar Sala</h2>
+            <label style="font-weight: 700;">¿Con cuántas palabras jugarán?</label><br>
+            <select id="host-num-palabras">
+                <option value="1">1 Palabra</option>
+                <option value="2">2 Palabras</option>
+                <option value="3">3 Palabras</option>
+                <option value="4">4 Palabras</option>
+                <option value="5">5 Palabras</option>
+            </select><br>
+            <button onclick="hostGenerarInputs()" class="btn-yellow">Siguiente</button>
+        </div>
         
-        <div class="marcador-superior">
-            <div class="stats-left">
-                <div class="stat-item"><span class="coin-icon gold"></span>Score: <span id="ui-score">0</span></div>
-                <div class="stat-item">Level: <span id="ui-level">1</span></div>
-            </div>
-            <img src="icono.png" alt="Game Logo" class="logo-min">
-            <div class="stats-right">
-                <div class="stat-item"><span id="ui-lives" class="hearts-row">❤️❤️❤️❤️❤️</span>Lives</div>
-                <div class="stat-item"><span class="coin-icon gold"></span>Coins: <span id="ui-coins">0</span></div>
-            </div>
+        <div id="host-paso2" class="oculto">
+            <h2 style="color: var(--blue-light);">¡Sala Creada!</h2>
+            <p style="font-weight: 700;">Pásale este código a tu rival:</p>
+            <div class="codigo-sala" id="mostrar-codigo">...</div>
+            <hr style="border: 1px solid var(--border-color); margin: 20px 0;">
+            <h3 style="color: var(--text-main);">Escribe tus Palabras Secretas</h3>
+            <p style="font-size: 12px; color: var(--text-muted);">Mínimo 3 letras. Sin espacios.</p>
+            <div id="host-inputs-palabras" style="display:flex; flex-direction:column; align-items:center;"></div>
+            <p id="error-host" class="alerta"></p>
+            <button id="btn-esperar" onclick="hostGuardarPalabras()" class="btn-blue" disabled>Esperando al rival...</button>
+        </div>
+    </div>
+
+    <div id="pantalla-guest" class="tarjeta oculto">
+        <div id="guest-paso1">
+            <h2 style="color: var(--pink-light);">Unirse a la Diversión</h2>
+            <label style="font-weight: 700;">Código de la Sala:</label><br>
+            <input type="text" id="guest-codigo" placeholder="Ej. ABCD" style="text-transform: uppercase;"><br>
+            <p id="error-guest-conexion" class="alerta"></p>
+            <button onclick="guestConectar()" class="btn-yellow">Conectar</button>
         </div>
 
-        <div class="zona-turnos tarjeta-pwa">
-            <h2 id="titulo-turno" style="margin: 0;">Espera tu turno</h2>
-            <p id="info-reconeccion" class="msg-sys oculto">Reconectando con rival...</p>
+        <div id="guest-paso2" class="oculto">
+            <h2 style="color: var(--pink-light);">¡Conectado!</h2>
+            <p style="font-weight: 700;">Jugaremos con <span id="guest-mostrar-num" style="color: var(--blue-light); font-size: 20px;"></span> palabras.</p>
+            <hr style="border: 1px solid var(--border-color); margin: 20px 0;">
+            <h3 style="color: var(--text-main);">Escribe tus Palabras Secretas</h3>
+            <p style="font-size: 12px; color: var(--text-muted);">Mínimo 3 letras. Sin espacios.</p>
+            <div id="guest-inputs-palabras" style="display:flex; flex-direction:column; align-items:center;"></div>
+            <p id="error-guest" class="alerta"></p>
+            <button onclick="guestGuardarPalabras()" class="btn-blue">¡Listo para Jugar!</button>
+        </div>
+    </div>
+
+    <div id="pantalla-juego" class="oculto">
+        
+        <div class="marcador" id="caja-marcador">
+            <h2 id="titulo-turno">Espera tu turno</h2>
+            <p id="subtitulo-turno" style="font-size: 14px; margin-top: 5px; font-weight: 600;">Conectando jugadores...</p>
         </div>
 
-        <div id="zona-palabras-rival"></div>
+        <div id="zona-palabras"></div>
 
-        <div class="game-footer">
-            <button onclick="intentarHint()" id="btn-hint" class="btn-coin-round gold star">HINT</button>
-            <button onclick="intentarSkip()" id="btn-skip" class="btn-coin-round pink">SKIP</button>
-        </div>
-
+        <div class="historial" id="historial"></div>
+        
+        <button onclick="location.reload()" class="btn-pink" style="margin-top: 20px; font-size: 12px; padding: 8px 16px;">Salir del Juego</button>
     </div>
 
 </div>
 
 <script>
-    // PREVENIR CIERRES ACCIDENTALES / SUSPENSIÓN DE BACKGROUND
-    window.addEventListener('beforeunload', function (e) {
-        if (GameModel.miRol !== 0 && !document.getElementById('pantalla-juego').classList.contains('oculto')) {
-            e.preventDefault(); e.returnValue = '';
-        }
-    });
-
-    // --- MODELO DEL JUEGO (Datos) ---
-    const GameModel = {
-        peer: null, conn: null,
-        miRol: 0, miNombre: "Jugador", nombreRival: "Rival",
-        numPalabras: 1, turnoActual: 1,
-        
-        misPalabras: [], progresoRival: [],
-        
-        // Stats (Basado en la imagen)
-        stats: { score: 1250, level: 10, lives: 5, coins: 50 }
-    };
-
-    // --- CONFIGURACIONES ---
+    let peer = null; let conn = null;
+    let miRol = 0; let miNombre = "Jugador"; let nombreRival = "Rival";
+    let numPalabras = 1; let turnoActual = 1;
+    let misPalabras = []; let progresoRival = []; 
     const MAX_ERR_LETRA = 10; const MAX_ERR_PALABRA = 3;
 
-    // --- VISTA (Manejo del DOM basado en el diseño) ---
-    const GameView = {
-        inputs: { nombre: () => document.getElementById('input-nombre') },
-        ui: {
-            score: () => document.getElementById('ui-score'),
-            level: () => document.getElementById('ui-level'),
-            lives: () => document.getElementById('ui-lives'),
-            coins: () => document.getElementById('ui-coins')
-        },
-        
-        actualizarStats: (stats) => {
-            GameView.ui.score().innerText = stats.score;
-            GameView.ui.level().innerText = stats.level;
-            GameView.ui.coins().innerText = stats.coins;
-            GameView.ui.lives().innerText = "❤️".repeat(stats.lives);
-        },
-        
-        dibujarRayasMultipalabra: (progreso) => {
-            let html = '';
-            progreso.forEach((p, i) => {
-                let colorClase = (i % 2 === 0) ? 'blue' : 'pink';
-                html += `
-                <div class="tarjeta-palabra tarjeta-pwa ${colorClase}">
-                    <div class="display-palabra">${p.adivinadas.join(' ')}</div>
-                    <div id="teclado-p${i}" class="contenedor-rayas"></div>
-                </div>`;
-            });
-            document.getElementById('zona-palabras-rival').innerHTML = html;
-        }
-    };
-
-    // --- CONTROLADOR (Lógica Multijugador y Juego) ---
-    const GameController = {
-        // Marcadores de posición para la lógica multijugador...
-        autoGuardarPartida: () => {
-            // ... lógica de auto-guardado ...
-        }
-    };
-
-    // Funciones globales vinculadas al HTML
-    function mostrarHost() {
-        // Redirige al flujo de hosteo...
-        document.getElementById('pantalla-inicio').classList.add('oculto');
-        document.getElementById('pantalla-juego').classList.remove('oculto');
-        GameView.actualizarStats(GameModel.stats); // Solo para la demo
-    }
+    function guardarNombre() { let n = document.getElementById('input-nombre').value.trim(); if(n) miNombre = n; }
     
-    function mostrarGuest() {
-        // Redirige al flujo de guest...
-        document.getElementById('pantalla-inicio').classList.add('oculto');
-        document.getElementById('pantalla-juego').classList.remove('oculto');
-        GameView.actualizarStats(GameModel.stats); // Solo para la demo
+    function generarInputs(contenedorId, cantidad) {
+        let html = '';
+        for(let i=0; i<cantidad; i++) {
+            html += `<input type="text" id="${contenedorId}-p${i}" placeholder="Palabra ${i+1}" autocomplete="off" style="text-transform: uppercase; font-weight: bold; letter-spacing: 2px;">`;
+        }
+        document.getElementById(contenedorId).innerHTML = html;
     }
 
-    // Inicialización al cargar
-    window.addEventListener('load', () => {
-        GameView.actualizarStats(GameModel.stats);
-    });
+    function leerYValidarInputs(contenedorId, cantidad, errorId) {
+        let palabras = []; let err = document.getElementById(errorId);
+        for(let i=0; i<cantidad; i++) {
+            let p = document.getElementById(`${contenedorId}-p${i}`).value.trim().toUpperCase();
+            if(p.length < 3) { err.innerText = `La Palabra ${i+1} debe tener al menos 3 letras.`; return null; }
+            if(/\s/.test(p)) { err.innerText = `La Palabra ${i+1} no debe contener espacios.`; return null; }
+            palabras.push(p);
+        }
+        err.innerText = ""; return palabras;
+    }
 
+    function mostrarHost() { guardarNombre(); miRol = 1; document.getElementById('pantalla-inicio').classList.add('oculto'); document.getElementById('pantalla-host').classList.remove('oculto'); }
+    function mostrarGuest() { guardarNombre(); miRol = 2; document.getElementById('pantalla-inicio').classList.add('oculto'); document.getElementById('pantalla-guest').classList.remove('oculto'); peer = new Peer(); }
+
+    function hostGenerarInputs() {
+        numPalabras = parseInt(document.getElementById('host-num-palabras').value);
+        document.getElementById('host-paso1').classList.add('oculto'); document.getElementById('host-paso2').classList.remove('oculto');
+        generarInputs('host-inputs-palabras', numPalabras);
+        
+        let codigoRoom = Math.random().toString(36).substring(2, 6).toUpperCase();
+        peer = new Peer('funword-' + codigoRoom);
+        peer.on('open', id => { document.getElementById('mostrar-codigo').innerText = codigoRoom; });
+        peer.on('connection', c => {
+            conn = c; configurarMensajes();
+            document.getElementById('btn-esperar').innerText = "¡Rival Conectado! Iniciar";
+            document.getElementById('btn-esperar').disabled = false;
+        });
+    }
+
+    function hostGuardarPalabras() {
+        let p = leerYValidarInputs('host-inputs-palabras', numPalabras, 'error-host'); if(!p) return;
+        misPalabras = p; conn.send({ tipo: 'INIT', num: numPalabras, nombre: miNombre });
+        document.getElementById('btn-esperar').innerText = "Esperando palabras del rival..."; document.getElementById('btn-esperar').disabled = true;
+    }
+
+    function guestConectar() {
+        let codigo = document.getElementById('guest-codigo').value.toUpperCase(); if(!codigo) return;
+        document.getElementById('error-guest-conexion').innerText = "Conectando...";
+        conn = peer.connect('funword-' + codigo);
+        conn.on('open', () => { document.getElementById('error-guest-conexion').innerText = ""; configurarMensajes(); });
+        peer.on('error', () => { document.getElementById('error-guest-conexion').innerText = "Sala no encontrada."; });
+    }
+
+    function guestGuardarPalabras() {
+        let p = leerYValidarInputs('guest-inputs-palabras', numPalabras, 'error-guest'); if(!p) return;
+        misPalabras = p; conn.send({ tipo: 'SECRET', palabras: misPalabras, nombre: miNombre });
+        document.getElementById('guest-paso2').innerHTML = "<p style='font-weight:bold; color:var(--blue-light);'>Esperando al Host...</p>";
+    }
+
+    function configurarMensajes() {
+        conn.on('data', datos => {
+            if(datos.tipo === 'INIT' && miRol === 2) {
+                numPalabras = datos.num; nombreRival = datos.nombre;
+                document.getElementById('guest-paso1').classList.add('oculto'); document.getElementById('guest-paso2').classList.remove('oculto');
+                document.getElementById('guest-mostrar-num').innerText = numPalabras; generarInputs('guest-inputs-palabras', numPalabras);
+            }
+            else if(datos.tipo === 'SECRET' && miRol === 1) {
+                nombreRival = datos.nombre; iniciarProgresoLocal(datos.palabras);
+                turnoActual = Math.random() < 0.5 ? 1 : 2;
+                conn.send({ tipo: 'START', turno: turnoActual, palabrasHost: misPalabras }); iniciarTablero();
+            }
+            else if(datos.tipo === 'START' && miRol === 2) {
+                turnoActual = datos.turno; iniciarProgresoLocal(datos.palabrasHost); iniciarTablero();
+            }
+            else if(datos.tipo === 'ACCION') { procesarAccionRival(datos); }
+        });
+    }
+
+    function iniciarProgresoLocal(palabrasRival) {
+        progresoRival = palabrasRival.map(p => { return { secreto: p, adivinadas: [p.charAt(0), p.charAt(p.length - 1)], errLetra: 0, errPalabra: 0, resuelta: false }; });
+    }
+
+    function iniciarTablero() {
+        document.getElementById('pantalla-host').classList.add('oculto'); document.getElementById('pantalla-guest').classList.add('oculto');
+        document.getElementById('pantalla-juego').classList.remove('oculto');
+        if(miRol === 1) document.getElementById('caja-marcador').style.backgroundColor = "var(--blue-light)";
+        else document.getElementById('caja-marcador').style.backgroundColor = "var(--pink-light)";
+        dibujarTarjetasPalabras(); actualizarTurnoUI();
+        agregarLog(`🏁 Partida iniciada contra ${nombreRival}.`);
+    }
+
+    function generarDisplayPalabra(obj) {
+        if(obj.resuelta) return obj.secreto.split('').join(' ');
+        let display = '';
+        for(let char of obj.secreto) { display += obj.adivinadas.includes(char) ? char + ' ' : '_ '; }
+        return display.trim();
+    }
+
+    function dibujarTarjetasPalabras() {
+        let html = '';
+        progresoRival.forEach((p, index) => {
+            let esResuelta = p.resuelta; let displayStr = generarDisplayPalabra(p);
+            let checkL = p.errLetra >= MAX_ERR_LETRA * 0.7 ? 'err-peligro' : ''; let checkP = p.errPalabra >= MAX_ERR_PALABRA - 1 ? 'err-peligro' : '';
+            html += `
+            <div class="tarjeta-palabra ${esResuelta ? 'resuelta' : ''}">
+                <div style="font-weight:800; color:var(--text-muted); text-transform:uppercase;">Palabra ${index + 1} ${esResuelta ? '✅' : ''}</div>
+                <div class="estadisticas">
+                    <span class="${checkL}">Errores Letra: ${p.errLetra}/${MAX_ERR_LETRA}</span>
+                    <span class="${checkP}">Errores Palabra: ${p.errPalabra}/${MAX_ERR_PALABRA}</span>
+                </div>
+                <div class="display-palabra">${displayStr}</div>
+                <div class="controles-adivinar ${esResuelta ? 'oculto' : ''}" id="controles-p${index}">
+                    <div class="fila-control">
+                        <input type="text" id="input-letra-${index}" class="input-letra" maxlength="1" placeholder="A" autocomplete="off">
+                        <button onclick="intentarLetra(${index})" class="btn-yellow">Adivinar Letra</button>
+                    </div>
+                    <div class="fila-control">
+                        <input type="text" id="input-palabra-${index}" placeholder="Escribe la palabra" autocomplete="off">
+                        <button onclick="intentarPalabra(${index})" class="btn-blue">Adivinar Palabra</button>
+                    </div>
+                    <p id="err-ui-${index}" class="alerta"></p>
+                </div>
+            </div>`;
+        });
+        document.getElementById('zona-palabras').innerHTML = html;
+    }
+
+    function actualizarTurnoUI() {
+        let titulo = document.getElementById('titulo-turno'); let subtitulo = document.getElementById('subtitulo-turno');
+        let esMiTurno = (turnoActual === miRol);
+        progresoRival.forEach((p, i) => {
+            let iL = document.getElementById(`input-letra-${i}`); let iP = document.getElementById(`input-palabra-${i}`);
+            let btns = document.querySelectorAll(`#controles-p${i} button`);
+            if(iL) { iL.disabled = !esMiTurno; iP.disabled = !esMiTurno; btns.forEach(b => b.disabled = !esMiTurno); }
+        });
+        if (esMiTurno) { titulo.innerText = "¡Es tu turno!"; subtitulo.innerText = "Adivina una letra o la palabra completa."; } 
+        else { titulo.innerText = `Turno de ${nombreRival}`; subtitulo.innerText = "Esperando jugada..."; }
+    }
+
+    function intentarLetra(index) {
+        let obj = progresoRival[index]; let input = document.getElementById(`input-letra-${index}`); let errUI = document.getElementById(`err-ui-${index}`);
+        let letra = input.value.trim().toUpperCase(); input.value = ""; errUI.innerText = "";
+        if(!letra || !/^[A-ZÑ]$/.test(letra)) return errUI.innerText = "Ingresa una letra válida.";
+        if(obj.adivinadas.includes(letra)) return errUI.innerText = "Esa letra ya está revelada.";
+        let acierto = obj.secreto.includes(letra);
+        if(acierto) { obj.adivinadas.push(letra); if(obj.secreto.split('').every(c => obj.adivinadas.includes(c))) obj.resuelta = true; } 
+        else { obj.errLetra++; }
+        enviarYProcesarLocal('LETRA', index, letra, acierto, obj);
+    }
+
+    function intentarPalabra(index) {
+        let obj = progresoRival[index]; let input = document.getElementById(`input-palabra-${index}`); let errUI = document.getElementById(`err-ui-${index}`);
+        let intento = input.value.trim().toUpperCase(); input.value = ""; errUI.innerText = "";
+        if(intento.length < 3) return errUI.innerText = "Escribe una palabra completa.";
+        let acierto = (intento === obj.secreto);
+        if(acierto) obj.resuelta = true; else obj.errPalabra++;
+        enviarYProcesarLocal('PALABRA', index, intento, acierto, obj);
+    }
+
+    function enviarYProcesarLocal(tipo, index, valor, acierto, obj) {
+        dibujarTarjetasPalabras(); agregarLog(`Intentaste la ${tipo.toLowerCase()} <b>${valor}</b> en Pal. ${index+1} ➔ ${acierto ? "✅" : "❌"}`);
+        let perdio = (obj.errLetra >= MAX_ERR_LETRA || obj.errPalabra >= MAX_ERR_PALABRA);
+        let gano = progresoRival.every(p => p.resuelta === true);
+        if(perdio) { conn.send({ tipo: 'ACCION', accion: tipo, idx: index, val: valor, acierto: acierto, fin: 'DERROTA' }); terminarJuego(nombreRival, `Alcanzaste el límite de errores.`); return; }
+        if(gano) { conn.send({ tipo: 'ACCION', accion: tipo, idx: index, val: valor, acierto: acierto, fin: 'VICTORIA' }); terminarJuego(miNombre, "¡Has adivinado todas las palabras!"); return; }
+        conn.send({ tipo: 'ACCION', accion: tipo, idx: index, val: valor, acierto: acierto, fin: 'NADA' });
+        turnoActual = (turnoActual === 1) ? 2 : 1; actualizarTurnoUI();
+    }
+
+    function procesarAccionRival(datos) {
+        agregarLog(`El Rival intentó la ${datos.accion.toLowerCase()} <b>${datos.val}</b> en tu Pal. ${datos.idx+1} ➔ ${datos.acierto ? "✅" : "❌"}`);
+        if(datos.fin === 'DERROTA') { terminarJuego(miNombre, `El rival alcanzó el límite de errores.`); return; }
+        if(datos.fin === 'VICTORIA') { terminarJuego(nombreRival, `El rival adivinó todas tus palabras.`); return; }
+        turnoActual = miRol; actualizarTurnoUI();
+    }
+
+    function terminarJuego(ganador, mensaje) {
+        document.getElementById('titulo-turno').innerText = ganador === miNombre ? "¡GANASTE! 🎉" : `¡GANÓ ${nombreRival.toUpperCase()}! 😔`;
+        document.getElementById('subtitulo-turno').innerText = mensaje;
+        turnoActual = 0; actualizarTurnoUI(); 
+        if(ganador === miNombre) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+    }
+
+    function agregarLog(texto) {
+        let div = document.createElement('div'); div.innerHTML = texto; div.style.marginBottom = "6px";
+        let hist = document.getElementById('historial'); hist.appendChild(div); hist.scrollTop = hist.scrollHeight;
+    }
 </script>
 
 <script>
-    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
+    if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('./sw.js'); }); }
 </script>
 
 </body>
