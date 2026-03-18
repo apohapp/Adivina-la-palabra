@@ -24,6 +24,11 @@
             --success-color: #10b981; --warning-color: #f59e0b; --danger-color: #ef4444;
         }
 
+        /* ESCUDO ANTIRRECARGAS */
+        html, body {
+            overscroll-behavior-y: none;
+        }
+
         body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top, #e0f2fe, var(--bg-body)); color: var(--text-main); text-align: center; margin: 0; padding: 20px 15px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
         .oculto { display: none !important; }
         .contenedor { width: 100%; max-width: 500px; }
@@ -327,7 +332,6 @@
                 });
             });
         } else {
-            // Re-setup if peer already exists
             btnEspera.innerText="Esperando Conexión...";
             btnEspera.disabled=true; 
         }
@@ -338,7 +342,6 @@
         document.getElementById(id).innerHTML = h; 
     }
 
-    // FLUJO CLASICO
     function hostGuardarPalabras() { 
         if (modoJuego === 'clasico') {
             let p = leerInputsData('host-inputs-palabras', numPalabras, 'error-host'); if(!p) return; 
@@ -367,7 +370,6 @@
 
     function leerInputsData(id, cant, errId) { let p=[]; let e=document.getElementById(errId); for(let i=0; i<cant; i++){ let v=document.getElementById(`${id}-p${i}`).value.trim().toUpperCase(), h=document.getElementById(`${id}-h${i}`).value.trim(); if(v.length<3){ e.innerText="Mínimo 3 letras por palabra."; return null; } p.push({palabra:v, pista:h}); } e.innerText=""; return p; }
 
-    // FLUJO FRENESÍ (GUEST)
     function guestReadyFrenzy() {
         document.getElementById('btn-guest-frenzy-listo').innerText = "ESPERANDO AL HOST...";
         document.getElementById('btn-guest-frenzy-listo').disabled = true;
@@ -395,7 +397,6 @@
                     document.getElementById('caja-espera-frenesi').classList.remove('oculto');
                 }
             }
-            // HOST RECIBE ESTO EN MODO FRENÉTICO
             else if (d.tipo==='READY_FRENZY' && miRol===1) {
                 let btn = document.getElementById('btn-esperar');
                 btn.innerText="¡RIVAL LISTO! INICIAR FRENESÍ"; 
@@ -410,17 +411,14 @@
                 if(!d.death) progresoRival = d.palabras.map(p => ({ secreto:p.palabra, pista:p.pista, adivinadas:[p.palabra[0], p.palabra[p.palabra.length-1]], errL:0, errP:0, resuelta:false, fracasada:false }));
                 checkFrenzyMuerteSubita();
             }
-            // LOGICA CLASICA
             else if(d.tipo==='INIT_CLASICO' && miRol===2){ iniciarProgreso(d.palabras); conn.send({tipo:'SECRET_CLASICO', palabras:misPalabras, nombre:miNombre}); document.getElementById('caja-inputs-guest-clasico').innerHTML="<div style='padding:20px; background:#f8fafc; border-radius:16px; font-weight:800; color:var(--blue-dark); text-align:center;'>Iniciando...</div>"; }
             else if(d.tipo==='SECRET_CLASICO' && miRol===1){ iniciarProgreso(d.palabras); turnoActual=Math.random()<0.5?1:2; conn.send({tipo:'START_GAME', turno:turnoActual, palabrasHost:misPalabras}); iniciarTablero(); }
             else if(d.tipo==='START_GAME' && miRol===2){ turnoActual=d.turno; iniciarProgreso(d.palabrasHost); iniciarTablero(); }
-            // COMUNES
             else if(d.tipo==='ACCION'){ procesarRival(d); }
             else if(d.tipo==='REMATCH_REQ'){ prepararRevancha(); }
         });
     }
 
-    // --- SISTEMA FRENÉTICO ---
     function startFrenzyCountdown() {
         document.querySelectorAll('.tarjeta').forEach(e=>e.classList.add('oculto'));
         let pf = document.getElementById('pantalla-frenesi');
@@ -490,7 +488,7 @@
                 finishMuerteSubita(miNombre, `¡Rival no escribió NADA en 15s! Muerte súbita. 💀`);
             } else {
                 turnoActual = Math.random()<0.5?1:2; 
-                numPalabras = 5; // To trigger Duelo mode styles
+                numPalabras = 5; 
                 iniciarTablero();
             }
         }
@@ -508,7 +506,6 @@
         document.getElementById('zona-mis-secretos').classList.add('oculto');
         document.querySelector('.caja-historial-container').classList.add('oculto');
     }
-    // ----------------------------
 
     function iniciarProgreso(pr) {
         progresoRival = pr.map(p => ({ secreto:p.palabra, pista:p.pista, adivinadas:[p.palabra[0], p.palabra[p.palabra.length-1]], errL:0, errP:0, resuelta:false, fracasada:false }));
@@ -603,7 +600,7 @@
 
         let f='NADA'; const s = calcStats(progresoRival);
         if(modoJuego==='clasico' && numPalabras===1){ if(obj.resuelta) f='W'; else if(obj.fracasada) f='L'; else turnoActual=(turnoActual===1?2:1); }
-        else { if(s.t === progresoRival.length) f='C'; } // All target words finished
+        else { if(s.t === progresoRival.length) f='C'; } 
         conn.send({tipo:'ACCION', idx, val, acierto, fin:f, s});
         
         if(f!=='NADA') checkDueloTerminado(s); else { dibujarTablero(); updateUI(); }
@@ -646,7 +643,7 @@
     function calcStats(p) { return { g:p.filter(x=>x.resuelta).length, t:p.filter(x=>x.resuelta||x.fracasada).length, errL:p.reduce((a,b)=>a+b.errL,0), errP:p.reduce((a,b)=>a+b.errP,0) }; }
 
     function decideWinner() {
-        if(turnoActual===0) return; // Prevent double execution
+        if(turnoActual===0) return; 
         clearInterval(timerInterval); const m=calcStats(progresoRival), r=calcStats(estadoMisPalabras);
         let g="", rz="";
         if(m.g > r.g){ g=miNombre; rz=`¡Adivinaste ${m.g} palabras! (Rival: ${r.g})`; }
