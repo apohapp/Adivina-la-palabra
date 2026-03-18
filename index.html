@@ -157,12 +157,33 @@
     let numPalabras = 1; let turnoActual = 1;
     let misPalabras = []; let progresoRival = []; 
     let estadoMisPalabras = []; 
+    let enJuegoActivo = false; // Variable para saber si estamos jugando
     
     const MAX_ERR_LETRA = 10; const MAX_ERR_PALABRA = 3;
 
+    // --- MANEJO DEL BOTÓN ATRÁS (History API) ---
+    // Creamos el estado inicial al cargar
+    history.replaceState({ pantalla: 'inicio' }, "Inicio", "");
+
+    window.addEventListener('popstate', function(event) {
+        if (enJuegoActivo && turnoActual !== 0) {
+            // Si están jugando y la partida no ha terminado
+            let salir = confirm("⚠️ ¿Estás seguro de que quieres abandonar la partida? Perderás todo el progreso y se desconectará la sala.");
+            if (salir) {
+                location.reload(); // Recarga y limpia todo
+            } else {
+                // Si dicen que no, volvemos a empujar el estado para seguir atrapando el botón atrás
+                history.pushState({ pantalla: 'juego' }, "Juego", "#juego");
+            }
+        } else {
+            // Si están en los menús o la partida ya terminó, volvemos al inicio limpio
+            location.reload();
+        }
+    });
+    // ---------------------------------------------
+
     function guardarNombre() { let n = document.getElementById('input-nombre').value.trim(); if(n) miNombre = n; }
     
-    // MODIFICADO: Ahora genera cuadro de palabra y pista juntos
     function generarInputs(contenedorId, cantidad) {
         let html = '';
         for(let i=0; i<cantidad; i++) {
@@ -175,7 +196,6 @@
         document.getElementById(contenedorId).innerHTML = html;
     }
 
-    // MODIFICADO: Lee la palabra y la pista
     function leerYValidarInputs(contenedorId, cantidad, errorId) {
         let palabras = []; let err = document.getElementById(errorId);
         for(let i=0; i<cantidad; i++) {
@@ -183,15 +203,25 @@
             let hint = document.getElementById(`${contenedorId}-hint${i}`).value.trim();
             if(p.length < 3) { err.innerText = `La Palabra ${i+1} debe tener al menos 3 letras.`; return null; }
             if(/\s/.test(p)) { err.innerText = `La Palabra ${i+1} no debe contener espacios.`; return null; }
-            
-            // Guardamos un objeto con ambas cosas
             palabras.push({ palabra: p, pista: hint });
         }
         err.innerText = ""; return palabras;
     }
 
-    function mostrarHost() { guardarNombre(); miRol = 1; document.getElementById('pantalla-inicio').classList.add('oculto'); document.getElementById('pantalla-host').classList.remove('oculto'); }
-    function mostrarGuest() { guardarNombre(); miRol = 2; document.getElementById('pantalla-inicio').classList.add('oculto'); document.getElementById('pantalla-guest').classList.remove('oculto'); peer = new Peer(); }
+    function mostrarHost() { 
+        guardarNombre(); miRol = 1; 
+        document.getElementById('pantalla-inicio').classList.add('oculto'); 
+        document.getElementById('pantalla-host').classList.remove('oculto'); 
+        history.pushState({ pantalla: 'config' }, "Configurar", "#host"); // Registrar paso
+    }
+    
+    function mostrarGuest() { 
+        guardarNombre(); miRol = 2; 
+        document.getElementById('pantalla-inicio').classList.add('oculto'); 
+        document.getElementById('pantalla-guest').classList.remove('oculto'); 
+        peer = new Peer(); 
+        history.pushState({ pantalla: 'config' }, "Unirse", "#guest"); // Registrar paso
+    }
 
     function hostGenerarInputs() {
         numPalabras = parseInt(document.getElementById('host-num-palabras').value);
@@ -245,7 +275,6 @@
         });
     }
 
-    // MODIFICADO: Lee la palabra y la pista desde el objeto
     function iniciarProgresoLocal(palabrasRival) {
         progresoRival = palabrasRival.map(p => { 
             return { secreto: p.palabra, pista: p.pista, adivinadas: [p.palabra.charAt(0), p.palabra.charAt(p.palabra.length - 1)], errLetra: 0, errPalabra: 0, resuelta: false, fracasada: false }; 
@@ -257,6 +286,9 @@
     }
 
     function iniciarTablero() {
+        enJuegoActivo = true; // El juego ha comenzado, activamos el seguro del botón atrás
+        history.pushState({ pantalla: 'juego' }, "Juego", "#juego"); // Registrar paso del juego
+        
         document.getElementById('pantalla-host').classList.add('oculto'); document.getElementById('pantalla-guest').classList.add('oculto');
         document.getElementById('pantalla-juego').classList.remove('oculto');
         dibujarTarjetasPalabras(); 
@@ -272,7 +304,6 @@
         return display.trim();
     }
 
-    // MODIFICADO: Agrega la vista de la pista en la tarjeta
     function dibujarTarjetasPalabras() {
         let html = '';
         progresoRival.forEach((p, index) => {
@@ -282,7 +313,6 @@
             let claseExtra = esResuelta ? 'resuelta' : (esFracasada ? 'fracasada' : '');
             let iconoTop = esResuelta ? '✅' : (esFracasada ? '❌' : '');
             
-            // Genera el HTML de la pista solo si escribieron algo
             let htmlPista = p.pista ? `<div class="texto-pista">💡 Pista: ${p.pista}</div>` : '';
 
             html += `
@@ -328,3 +358,123 @@
 
         progresoRival.forEach((p, i) => {
             let iL = document.getElementById(`input-letra-${i}`); let iP = document.getElementById(`input-palabra-${i}`);
+            let btns = document.querySelectorAll(`#controles-p${i} button`);
+            if(iL) { iL.disabled = !esMiTurno; iP.disabled = !esMiTurno; btns.forEach(b => b.disabled = !esMiTurno); }
+        });
+
+        if (numPalabras > 1) {
+            marcador.className = "marcador carrera";
+            titulo.innerText = "¡CARRERA ACTIVADA!"; subtitulo.innerText = "Adivina tus palabras lo más rápido que puedas.";
+        } else {
+            marcador.className = "marcador";
+            if (esMiTurno) { titulo.innerText = "¡Es tu turno!"; subtitulo.innerText = "Adivina una letra o la palabra completa."; marcador.style.backgroundColor = "var(--blue-light)"; } 
+            else { titulo.innerText = `Turno de ${nombreRival}`; subtitulo.innerText = "Esperando jugada..."; marcador.style.backgroundColor = "var(--pink-light)";}
+        }
+    }
+
+    function intentarLetra(index) {
+        let obj = progresoRival[index]; let input = document.getElementById(`input-letra-${index}`); let errUI = document.getElementById(`err-ui-${index}`);
+        let letra = input.value.trim().toUpperCase(); input.value = ""; errUI.innerText = "";
+        if(!letra || !/^[A-ZÑ]$/.test(letra)) return errUI.innerText = "Ingresa una letra válida.";
+        if(obj.adivinadas.includes(letra)) return errUI.innerText = "Esa letra ya está revelada.";
+        let acierto = obj.secreto.includes(letra);
+        if(acierto) { obj.adivinadas.push(letra); if(obj.secreto.split('').every(c => obj.adivinadas.includes(c))) obj.resuelta = true; } 
+        else { obj.errLetra++; }
+        enviarYProcesarLocal('LETRA', index, letra, acierto, obj);
+    }
+
+    function intentarPalabra(index) {
+        let obj = progresoRival[index]; let input = document.getElementById(`input-palabra-${index}`); let errUI = document.getElementById(`err-ui-${index}`);
+        let intento = input.value.trim().toUpperCase(); input.value = ""; errUI.innerText = "";
+        if(intento.length < 3) return errUI.innerText = "Escribe una palabra completa.";
+        let acierto = (intento === obj.secreto);
+        if(acierto) obj.resuelta = true; else obj.errPalabra++;
+        enviarYProcesarLocal('PALABRA', index, intento, acierto, obj);
+    }
+
+    function enviarYProcesarLocal(tipo, index, valor, acierto, obj) {
+        let perdioPalabra = (obj.errLetra >= MAX_ERR_LETRA || obj.errPalabra >= MAX_ERR_PALABRA);
+        let ganoPalabra = obj.resuelta;
+        let finMensaje = 'NADA';
+
+        agregarLog(`Intentaste la ${tipo.toLowerCase()} <b>${valor}</b> en Pal. ${index+1} ➔ ${acierto ? "✅" : "❌"}`);
+
+        if (numPalabras === 1) {
+            if (perdioPalabra) { finMensaje = 'DERROTA'; terminarJuego(nombreRival, "Alcanzaste el límite de errores."); }
+            else if (ganoPalabra) { finMensaje = 'VICTORIA'; terminarJuego(miNombre, "¡Adivinaste la palabra!"); }
+            else { turnoActual = (turnoActual === 1) ? 2 : 1; }
+        } else {
+            if (perdioPalabra) { obj.fracasada = true; finMensaje = 'PALABRA_PERDIDA'; } 
+            else if (ganoPalabra) { finMensaje = 'PALABRA_GANADA'; }
+
+            let misPuntos = progresoRival.filter(p => p.resuelta).length;
+            let misFracasos = progresoRival.filter(p => p.fracasada).length;
+            let targetWin = Math.floor(numPalabras / 2) + 1; 
+
+            if (misPuntos >= targetWin) {
+                finMensaje = 'VICTORIA_TOTAL'; terminarJuego(miNombre, "¡Alcanzaste la mayoría de aciertos!");
+            } else if ((numPalabras - misFracasos) < targetWin) {
+                finMensaje = 'DERROTA_MATEMATICA'; terminarJuego(nombreRival, "Perdiste demasiadas palabras. Imposible ganar.");
+            }
+        }
+
+        conn.send({ tipo: 'ACCION', accion: tipo, idx: index, val: valor, acierto: acierto, fin: finMensaje });
+        dibujarTarjetasPalabras(); actualizarTurnoUI();
+    }
+
+    function procesarAccionRival(datos) {
+        agregarLog(`El Rival intentó <b>${datos.val}</b> en tu Pal. ${datos.idx+1} ➔ ${datos.acierto ? "✅" : "❌"}`);
+        
+        let miPalabra = estadoMisPalabras[datos.idx];
+        if (datos.accion === 'LETRA' && datos.acierto) miPalabra.adivinadas.push(datos.val);
+        if (datos.accion === 'PALABRA' && datos.acierto) miPalabra.resuelta = true; 
+        if (datos.fin === 'PALABRA_PERDIDA' || datos.fin === 'DERROTA') miPalabra.fracasada = true;
+        if (datos.fin === 'PALABRA_GANADA' || datos.fin === 'VICTORIA') miPalabra.resuelta = true;
+        dibujarMisSecretos();
+
+        if(datos.fin === 'DERROTA') { terminarJuego(miNombre, `El rival alcanzó el límite de errores.`); return; }
+        if(datos.fin === 'VICTORIA') { terminarJuego(nombreRival, `El rival adivinó tu palabra.`); return; }
+        if(datos.fin === 'VICTORIA_TOTAL') { terminarJuego(nombreRival, `El rival alcanzó la mayoría primero.`); return; }
+        if(datos.fin === 'DERROTA_MATEMATICA') { terminarJuego(miNombre, `El rival perdió demasiadas palabras.`); return; }
+
+        if(numPalabras === 1) { turnoActual = miRol; actualizarTurnoUI(); }
+    }
+
+    function terminarJuego(ganador, mensaje) {
+        let marcador = document.getElementById('caja-marcador');
+        let titulo = document.getElementById('titulo-turno');
+        let subtitulo = document.getElementById('subtitulo-turno');
+        
+        document.getElementById('zona-palabras').classList.add('oculto');
+        
+        marcador.className = "marcador"; 
+        if (ganador === miNombre) {
+            titulo.innerText = "¡GANASTE! 🎉";
+            marcador.style.backgroundColor = "#10b981"; 
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+        } else {
+            titulo.innerText = `¡GANÓ ${nombreRival.toUpperCase()}! 😔`;
+            marcador.style.backgroundColor = "var(--pink-dark)"; 
+        }
+        
+        titulo.style.fontSize = "36px";
+        titulo.style.textShadow = "2px 2px 0 rgba(0,0,0,0.3)";
+        subtitulo.innerText = mensaje;
+        subtitulo.style.fontSize = "16px";
+        subtitulo.style.color = "white";
+        
+        turnoActual = 0; 
+    }
+
+    function agregarLog(texto) {
+        let div = document.createElement('div'); div.innerHTML = texto; div.style.marginBottom = "6px";
+        let hist = document.getElementById('historial'); hist.appendChild(div); hist.scrollTop = hist.scrollHeight;
+    }
+</script>
+
+<script>
+    if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('./sw.js'); }); }
+</script>
+
+</body>
+</html>
