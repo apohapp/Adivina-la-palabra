@@ -320,7 +320,7 @@
                 if(modoJuego === 'clasico') {
                     btnEspera.innerText="¡Rival Conectado! Iniciar"; btnEspera.disabled=false; 
                 } else {
-                    btnEspera.innerText="¡Rival Listo! Iniciar Frenesí"; btnEspera.disabled=true; // Auto start when guest ready
+                    btnEspera.innerText="Rival conectado. Esperando que esté listo..."; btnEspera.disabled=true; 
                 }
             });
         }
@@ -385,7 +385,7 @@
             }
             // HOST RECIBE ESTO EN MODO FRENÉTICO
             else if (d.tipo==='READY_FRENZY' && miRol===1) {
-                document.getElementById('btn-esperar').innerText="¡INICIAR FRENESÍ!"; 
+                document.getElementById('btn-esperar').innerText="¡RIVAL LISTO! INICIAR FRENESÍ"; 
                 document.getElementById('btn-esperar').disabled=false;
                 document.getElementById('btn-esperar').onclick = () => { conn.send({tipo: 'START_FRENZY'}); startFrenzyCountdown(); };
             }
