@@ -45,9 +45,9 @@
         .codigo-sala { font-family: monospace; font-size: 32px; font-weight: 900; color: var(--pink-light); background: #fff0f5; padding: 15px; border-radius: 12px; letter-spacing: 6px; border: 2px dashed var(--pink-light); display: inline-block; margin: 15px 0;}
         .alerta { color: var(--pink-light); font-size: 14px; font-weight: 700; margin: 5px 0; min-height: 20px; }
 
-        .marcador { background: var(--blue-light); color: white; padding: 15px; border-radius: 15px; box-shadow: 0 6px 0 var(--blue-dark); margin-bottom: 25px; border: 2px solid white; transition: background 0.3s;}
+        .marcador { background: var(--blue-light); color: white; padding: 15px; border-radius: 15px; box-shadow: 0 6px 0 var(--blue-dark); margin-bottom: 25px; border: 2px solid white; transition: all 0.4s ease;}
         .marcador.carrera { background: var(--yellow-light); box-shadow: 0 6px 0 var(--yellow-dark); color: #fff;}
-        .marcador h2 { margin: 0; font-size: 22px; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+        .marcador h2 { margin: 0; font-size: 22px; text-shadow: 1px 1px 0 rgba(0,0,0,0.2); transition: all 0.3s; }
         
         .tarjeta-palabra { background: white; border: 3px solid var(--border-color); border-radius: 15px; padding: 20px; margin-bottom: 20px; box-shadow: 0 6px 12px rgba(0,0,0,0.05); transition: all 0.3s; }
         .tarjeta-palabra.resuelta { border-color: #10b981; background-color: #f0fdf4; }
@@ -61,7 +61,12 @@
         .fila-control { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; flex-wrap: wrap;}
         .input-letra { width: 70px !important; text-transform: uppercase; font-weight: 900; font-size: 24px !important; }
 
-        .historial { background: #f8fafc; border-radius: 12px; padding: 15px; height: 150px; overflow-y: auto; text-align: left; font-size: 13px; border: 2px solid var(--border-color); margin-top: 15px; }
+        .historial { background: #f8fafc; border-radius: 12px; padding: 15px; height: 120px; overflow-y: auto; text-align: left; font-size: 13px; border: 2px solid var(--border-color); margin-top: 15px; }
+        
+        /* NUEVA SECCIÓN: MIS SECRETOS */
+        .mis-secretos { background: #fff0f5; border: 2px dashed var(--pink-light); border-radius: 12px; padding: 15px; margin-top: 15px; text-align: center;}
+        .mis-secretos h3 { color: var(--pink-dark); margin: 0 0 10px 0; font-size: 16px; text-transform: uppercase;}
+        .item-secreto { font-family: monospace; font-size: 18px; font-weight: bold; letter-spacing: 3px; margin: 8px 0; padding: 5px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
     </style>
 </head>
 <body>
@@ -70,7 +75,7 @@
 
     <div id="pantalla-inicio" class="tarjeta" style="border: none; box-shadow: none;">
         <div class="fila-inicio">
-            <img src="icono-192.png" alt="Logo Game" class="logo-img">
+            <img src="icono-192.png" alt="Logo Game" class="logo-img" onerror="this.src='icono.png'">
             <input type="text" id="input-nombre" placeholder="Escribe tu nombre" autocomplete="off" style="margin: 0; max-width: 200px;">
             <button onclick="mostrarHost()" class="btn-blue">Crear Sala (Host)</button>
             <button onclick="mostrarGuest()" class="btn-pink">Unirse a Sala</button>
@@ -124,12 +129,22 @@
     </div>
 
     <div id="pantalla-juego" class="oculto">
+        
         <div class="marcador" id="caja-marcador">
             <h2 id="titulo-turno">Espera tu turno</h2>
             <p id="subtitulo-turno" style="font-size: 14px; margin-top: 5px; font-weight: 600;">Conectando jugadores...</p>
         </div>
+
         <div id="zona-palabras"></div>
+
         <div class="historial" id="historial"></div>
+        
+        <div class="mis-secretos" id="zona-mis-secretos">
+            <h3>Tus Palabras Secretas</h3>
+            <p style="font-size: 11px; color: var(--text-muted); margin: 0 0 10px 0;">Así va el progreso de tu rival:</p>
+            <div id="lista-mis-secretos"></div>
+        </div>
+
         <button onclick="location.reload()" class="btn-pink" style="margin-top: 20px; font-size: 12px; padding: 8px 16px;">Salir del Juego</button>
     </div>
 
@@ -140,6 +155,10 @@
     let miRol = 0; let miNombre = "Jugador"; let nombreRival = "Rival";
     let numPalabras = 1; let turnoActual = 1;
     let misPalabras = []; let progresoRival = []; 
+    
+    // NUEVO: Array para rastrear el progreso de mis propias palabras
+    let estadoMisPalabras = []; 
+    
     const MAX_ERR_LETRA = 10; const MAX_ERR_PALABRA = 3;
 
     function guardarNombre() { let n = document.getElementById('input-nombre').value.trim(); if(n) miNombre = n; }
@@ -219,33 +238,35 @@
     }
 
     function iniciarProgresoLocal(palabrasRival) {
-        // NUEVO: Agregamos la propiedad 'fracasada' a cada palabra
         progresoRival = palabrasRival.map(p => { return { secreto: p, adivinadas: [p.charAt(0), p.charAt(p.length - 1)], errLetra: 0, errPalabra: 0, resuelta: false, fracasada: false }; });
+        
+        // Inicializar el progreso de MIS palabras
+        estadoMisPalabras = misPalabras.map(p => { return { secreto: p, adivinadas: [p.charAt(0), p.charAt(p.length - 1)], resuelta: false, fracasada: false }; });
     }
 
     function iniciarTablero() {
         document.getElementById('pantalla-host').classList.add('oculto'); document.getElementById('pantalla-guest').classList.add('oculto');
         document.getElementById('pantalla-juego').classList.remove('oculto');
-        dibujarTarjetasPalabras(); actualizarTurnoUI();
+        dibujarTarjetasPalabras(); 
+        dibujarMisSecretos(); // Dibuja mi panel
+        actualizarTurnoUI();
         agregarLog(`🏁 Partida iniciada contra ${nombreRival}.`);
     }
 
     function generarDisplayPalabra(obj) {
-        // Si ya fracasó o resolvió, muestra toda la palabra
         if(obj.resuelta || obj.fracasada) return obj.secreto.split('').join(' ');
         let display = '';
         for(let char of obj.secreto) { display += obj.adivinadas.includes(char) ? char + ' ' : '_ '; }
         return display.trim();
     }
 
+    // DIBUJAR LO QUE YO ADIVINO
     function dibujarTarjetasPalabras() {
         let html = '';
         progresoRival.forEach((p, index) => {
             let esResuelta = p.resuelta; let esFracasada = p.fracasada;
             let displayStr = generarDisplayPalabra(p);
             let checkL = p.errLetra >= MAX_ERR_LETRA * 0.7 ? 'err-peligro' : ''; let checkP = p.errPalabra >= MAX_ERR_PALABRA - 1 ? 'err-peligro' : '';
-            
-            // Estilos dinámicos para victoria o derrota
             let claseExtra = esResuelta ? 'resuelta' : (esFracasada ? 'fracasada' : '');
             let iconoTop = esResuelta ? '✅' : (esFracasada ? '❌' : '');
 
@@ -273,10 +294,22 @@
         document.getElementById('zona-palabras').innerHTML = html;
     }
 
+    // NUEVO: DIBUJAR MIS SECRETOS (Lo que el rival adivina)
+    function dibujarMisSecretos() {
+        let html = '';
+        estadoMisPalabras.forEach((p, i) => {
+            // Reconstruye cómo se ve la palabra para el rival en este momento
+            let display = p.secreto.split('').map(c => (p.adivinadas.includes(c) || p.resuelta || p.fracasada) ? c : '_').join(' ');
+            let color = p.resuelta ? '#10b981' : (p.fracasada ? 'var(--pink-light)' : 'var(--text-main)');
+            let icono = p.resuelta ? '✅' : (p.fracasada ? '❌' : '⏳');
+            
+            html += `<div class="item-secreto" style="color: ${color};">Palabra ${i+1}: ${display} ${icono}</div>`;
+        });
+        document.getElementById('lista-mis-secretos').innerHTML = html;
+    }
+
     function actualizarTurnoUI() {
         let titulo = document.getElementById('titulo-turno'); let subtitulo = document.getElementById('subtitulo-turno'); let marcador = document.getElementById('caja-marcador');
-        
-        // LA MAGIA DE LA NUEVA LÓGICA
         let esMiTurno = (numPalabras === 1) ? (turnoActual === miRol) : true;
 
         progresoRival.forEach((p, i) => {
@@ -287,8 +320,7 @@
 
         if (numPalabras > 1) {
             marcador.className = "marcador carrera";
-            titulo.innerText = "¡CARRERA ACTIVADA!";
-            subtitulo.innerText = "Adivina tus palabras lo más rápido que puedas.";
+            titulo.innerText = "¡CARRERA ACTIVADA!"; subtitulo.innerText = "Adivina tus palabras lo más rápido que puedas.";
         } else {
             marcador.className = "marcador";
             if (esMiTurno) { titulo.innerText = "¡Es tu turno!"; subtitulo.innerText = "Adivina una letra o la palabra completa."; marcador.style.backgroundColor = "var(--blue-light)"; } 
@@ -324,26 +356,21 @@
         agregarLog(`Intentaste la ${tipo.toLowerCase()} <b>${valor}</b> en Pal. ${index+1} ➔ ${acierto ? "✅" : "❌"}`);
 
         if (numPalabras === 1) {
-            // LÓGICA CLÁSICA DE 1 PALABRA
             if (perdioPalabra) { finMensaje = 'DERROTA'; terminarJuego(nombreRival, "Alcanzaste el límite de errores."); }
             else if (ganoPalabra) { finMensaje = 'VICTORIA'; terminarJuego(miNombre, "¡Adivinaste la palabra!"); }
             else { turnoActual = (turnoActual === 1) ? 2 : 1; }
         } else {
-            // LÓGICA MULTIPALABRA (CARRERA Y MAYORÍA)
             if (perdioPalabra) { obj.fracasada = true; finMensaje = 'PALABRA_PERDIDA'; } 
             else if (ganoPalabra) { finMensaje = 'PALABRA_GANADA'; }
 
-            // Evaluaciones Matemáticas de Victoria/Derrota
             let misPuntos = progresoRival.filter(p => p.resuelta).length;
             let misFracasos = progresoRival.filter(p => p.fracasada).length;
-            let targetWin = Math.floor(numPalabras / 2) + 1; // Mayoría (Ej. 2 de 3)
+            let targetWin = Math.floor(numPalabras / 2) + 1; 
 
             if (misPuntos >= targetWin) {
-                finMensaje = 'VICTORIA_TOTAL';
-                terminarJuego(miNombre, "¡Alcanzaste la mayoría de aciertos!");
+                finMensaje = 'VICTORIA_TOTAL'; terminarJuego(miNombre, "¡Alcanzaste la mayoría de aciertos!");
             } else if ((numPalabras - misFracasos) < targetWin) {
-                finMensaje = 'DERROTA_MATEMATICA';
-                terminarJuego(nombreRival, "Perdiste demasiadas palabras. Imposible ganar.");
+                finMensaje = 'DERROTA_MATEMATICA'; terminarJuego(nombreRival, "Perdiste demasiadas palabras. Imposible ganar.");
             }
         }
 
@@ -354,26 +381,49 @@
     function procesarAccionRival(datos) {
         agregarLog(`El Rival intentó <b>${datos.val}</b> en tu Pal. ${datos.idx+1} ➔ ${datos.acierto ? "✅" : "❌"}`);
         
-        // Resultados de 1 Palabra
+        // ACTUALIZAR MI PANEL DE SECRETOS
+        let miPalabra = estadoMisPalabras[datos.idx];
+        if (datos.accion === 'LETRA' && datos.acierto) miPalabra.adivinadas.push(datos.val);
+        if (datos.accion === 'PALABRA' && datos.acierto) miPalabra.resuelta = true; // Si adivina la palabra completa
+        if (datos.fin === 'PALABRA_PERDIDA' || datos.fin === 'DERROTA') miPalabra.fracasada = true;
+        if (datos.fin === 'PALABRA_GANADA' || datos.fin === 'VICTORIA') miPalabra.resuelta = true;
+        dibujarMisSecretos();
+
+        // RESULTADOS GLOBALES (Impacto Visual Sincronizado)
         if(datos.fin === 'DERROTA') { terminarJuego(miNombre, `El rival alcanzó el límite de errores.`); return; }
         if(datos.fin === 'VICTORIA') { terminarJuego(nombreRival, `El rival adivinó tu palabra.`); return; }
-        
-        // Resultados de Carrera
         if(datos.fin === 'VICTORIA_TOTAL') { terminarJuego(nombreRival, `El rival alcanzó la mayoría primero.`); return; }
         if(datos.fin === 'DERROTA_MATEMATICA') { terminarJuego(miNombre, `El rival perdió demasiadas palabras.`); return; }
 
         if(numPalabras === 1) { turnoActual = miRol; actualizarTurnoUI(); }
     }
 
+    // NUEVO: FUNCIÓN TERMINAR JUEGO (Con impacto visual fuerte)
     function terminarJuego(ganador, mensaje) {
-        document.getElementById('titulo-turno').innerText = ganador === miNombre ? "¡GANASTE! 🎉" : `¡GANÓ ${nombreRival.toUpperCase()}! 😔`;
-        document.getElementById('caja-marcador').className = "marcador";
-        document.getElementById('caja-marcador').style.backgroundColor = ganador === miNombre ? "#10b981" : "var(--pink-light)";
-        document.getElementById('subtitulo-turno').innerText = mensaje;
+        let marcador = document.getElementById('caja-marcador');
+        let titulo = document.getElementById('titulo-turno');
+        let subtitulo = document.getElementById('subtitulo-turno');
+        
+        // Esconder la zona de juego para que el aviso sea inmenso y claro
+        document.getElementById('zona-palabras').classList.add('oculto');
+        
+        marcador.className = "marcador"; // Quita la clase carrera si la tuviera
+        if (ganador === miNombre) {
+            titulo.innerText = "¡GANASTE! 🎉";
+            marcador.style.backgroundColor = "#10b981"; // Verde victoria
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+        } else {
+            titulo.innerText = `¡GANÓ ${nombreRival.toUpperCase()}! 😔`;
+            marcador.style.backgroundColor = "var(--pink-dark)"; // Rojo/Rosa oscuro derrota
+        }
+        
+        titulo.style.fontSize = "36px"; // Letra gigante
+        titulo.style.textShadow = "2px 2px 0 rgba(0,0,0,0.3)";
+        subtitulo.innerText = mensaje;
+        subtitulo.style.fontSize = "16px";
+        subtitulo.style.color = "white";
         
         turnoActual = 0; // Bloquea todo
-        if(numPalabras === 1) actualizarTurnoUI(); else { document.querySelectorAll('input, button:not(.btn-pink)').forEach(e => e.disabled = true); }
-        if(ganador === miNombre) confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
     }
 
     function agregarLog(texto) {
