@@ -71,6 +71,17 @@
         .item-secreto { font-family: monospace; font-size: 16px; font-weight: bold; margin: 10px 0; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .item-secreto .original { font-size: 11px; color: var(--text-muted); display: block; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px; margin-bottom: 6px;}
 
+        /* --- NUEVO: CONTROLES COMPACTOS (PANEL DE MANDO) --- */
+        .panel-mando { background: #f8fafc; padding: 15px; border-radius: 15px; border: 2px dashed var(--border-color); margin-top: 15px; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .fila-mando { display: flex; gap: 8px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; }
+        
+        .input-l-mini { width: 55px !important; height: 50px !important; padding: 0 !important; font-size: 24px !important; font-weight: 900; border-radius: 12px !important; border: 3px solid var(--yellow-light) !important; margin: 0 !important; text-transform: uppercase; }
+        .btn-l-mini { margin: 0 !important; height: 50px; padding: 0 20px !important; font-size: 16px !important; border-radius: 12px !important; }
+        
+        .input-p-mini { width: 160px !important; height: 45px !important; padding: 0 10px !important; font-size: 14px !important; font-weight: 700; border-radius: 12px !important; border: 3px solid var(--blue-light) !important; margin: 0 !important; text-transform: uppercase; }
+        .btn-p-mini { margin: 0 !important; height: 45px; padding: 0 20px !important; font-size: 14px !important; border-radius: 12px !important; }
+        /* --------------------------------------------------- */
+
         @keyframes latido { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
@@ -219,7 +230,30 @@
             let disp = rev ? p.secreto.split('').join(' ') : p.secreto.split('').map(c=>p.adivinadas.includes(c)?c:'_').join(' ');
             let porcL = (p.errL / MAX_ERR_LETRA) * 100, porcP = (p.errP / MAX_ERR_PALABRA) * 100;
             let colL = getColorBarra(p.errL, MAX_ERR_LETRA), colP = getColorBarra(p.errP, MAX_ERR_PALABRA);
-            h += `<div class="tarjeta-palabra ${p.resuelta?'resuelta':(p.fracasada?'fracasada':'')}"><div style="font-size:12px;font-weight:800;color:#64748b;">PALABRA ${i+1} ${p.resuelta?'✅':(p.fracasada?'❌':'')}</div><div class="panel-errores-grafico" id="panel-err-${i}"><div class="fila-error-grafica"><span class="icono-error-tipo">🅰️</span><div class="barra-error-contenedor"><div class="barra-error-progreso" style="width:${porcL}%; background-color:${colL};"></div></div><span class="texto-error-conteo">${p.errL}/${MAX_ERR_LETRA}</span></div><div class="fila-error-grafica"><span class="icono-error-tipo">📖</span><div class="barra-error-contenedor"><div class="barra-error-progreso" style="width:${porcP}%; background-color:${colP};"></div></div><span class="texto-error-conteo">${p.errP}/${MAX_ERR_PALABRA}</span></div></div>${p.pista?`<div class="texto-pista">💡 ${p.pista}</div>`:''}<div class="display-palabra">${disp}</div>${(p.fracasada||(t&&!p.resuelta))?`<div class="texto-revelacion">Era: ${p.secreto}</div>`:''}<div class="controles-adivinar ${rev?'oculto':''}"><div class="fila-control"><input type="text" id="in-l-${i}" class="input-letra" maxlength="1"><button onclick="intentarLetra(${i})" class="btn-yellow">Letra</button></div><div class="fila-control"><input type="text" id="in-p-${i}" placeholder="¡Adivinar!" style="font-size:14px;"><button onclick="intentarPalabra(${i})" class="btn-blue">YA</button></div></div></div>`;
+            
+            // Reemplazo del HTML original por el PANEL DE MANDO COMPACTO
+            h += `
+            <div class="tarjeta-palabra ${p.resuelta?'resuelta':(p.fracasada?'fracasada':'')}">
+                <div style="font-size:12px;font-weight:800;color:#64748b;">PALABRA ${i+1} ${p.resuelta?'✅':(p.fracasada?'❌':'')}</div>
+                <div class="panel-errores-grafico" id="panel-err-${i}">
+                    <div class="fila-error-grafica"><span class="icono-error-tipo">🅰️</span><div class="barra-error-contenedor"><div class="barra-error-progreso" style="width:${porcL}%; background-color:${colL};"></div></div><span class="texto-error-conteo">${p.errL}/${MAX_ERR_LETRA}</span></div>
+                    <div class="fila-error-grafica"><span class="icono-error-tipo">📖</span><div class="barra-error-contenedor"><div class="barra-error-progreso" style="width:${porcP}%; background-color:${colP};"></div></div><span class="texto-error-conteo">${p.errP}/${MAX_ERR_PALABRA}</span></div>
+                </div>
+                ${p.pista?`<div class="texto-pista">💡 ${p.pista}</div>`:''}
+                <div class="display-palabra">${disp}</div>
+                ${(p.fracasada||(t&&!p.resuelta))?`<div class="texto-revelacion">Era: ${p.secreto}</div>`:''}
+                
+                <div class="controles-adivinar ${rev?'oculto':''} panel-mando">
+                    <div class="fila-mando">
+                        <input type="text" id="in-l-${i}" class="input-l-mini" maxlength="1" placeholder="?">
+                        <button onclick="intentarLetra(${i})" class="btn-yellow btn-l-mini">Letra</button>
+                    </div>
+                    <div class="fila-mando">
+                        <input type="text" id="in-p-${i}" class="input-p-mini" placeholder="¡Adivinar!" autocomplete="off">
+                        <button onclick="intentarPalabra(${i})" class="btn-blue btn-p-mini">YA</button>
+                    </div>
+                </div>
+            </div>`;
         });
         document.getElementById('zona-palabras').innerHTML = h;
         h=''; estadoMisPalabras.forEach((p,i)=>{ let d = p.secreto.split('').map(c=>(p.adivinadas.includes(c)||p.resuelta||p.fracasada)?c:'_').join(' '); h += `<div class="item-secreto"><span class="original">Pusiste: <b>${p.secreto}</b></span>Rival: ${d} ${p.resuelta?'✅':(p.fracasada?'❌':'⏳')}</div>`; });
