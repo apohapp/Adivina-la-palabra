@@ -24,11 +24,6 @@
             --success-color: #10b981; --warning-color: #f59e0b; --danger-color: #ef4444;
         }
 
-        /* ESCUDO ANTIRRECARGAS */
-        html, body {
-            overscroll-behavior-y: none;
-        }
-
         body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top, #e0f2fe, var(--bg-body)); color: var(--text-main); text-align: center; margin: 0; padding: 20px 15px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
         .oculto { display: none !important; }
         .contenedor { width: 100%; max-width: 500px; }
@@ -123,6 +118,11 @@
 
         @keyframes errorPop { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
         @keyframes latido { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+        
+        /* ESCUDO ANTIRRECARGAS */
+        html, body {
+            overscroll-behavior-y: none;
+        }
     </style>
 </head>
 <body>
@@ -154,7 +154,7 @@
                     <option value="clasico">🛡️ Clásico (Estratégico)</option>
                     <option value="frenetico">🔥 Frenético (Muerte Súbita)</option>
                 </select>
-                <p id="desc-frenetico" class="oculto" style="font-size: 11px; font-weight: 700; color: var(--pink-dark); margin: 8px 0 0 0;">¡15 segundos para armar defensas! El que no escribe, PIERDE al instante.</p>
+                <p id="desc-frenetico" class="oculto" style="font-size: 11px; font-weight: 700; color: var(--pink-dark); margin: 8px 0 0 0;">¡25 segundos para armar defensas! El que no escribe, PIERDE al instante.</p>
             </div>
 
             <div style="text-align: left; margin-bottom: 15px;">
@@ -212,7 +212,7 @@
             </div>
             <div id="caja-espera-frenesi" class="oculto">
                 <h3 style="color: var(--pink-dark); font-weight: 900;">🔥 MODO FRENÉTICO ACTIVO</h3>
-                <p style="font-weight: 700; font-size: 14px;">Prepárate. Tendrás solo 15 segundos para armar tus defensas en cuanto el Host inicie.</p>
+                <p style="font-weight: 700; font-size: 14px;">Prepárate. Tendrás solo 25 segundos para armar tus defensas en cuanto el Host inicie.</p>
                 <button id="btn-guest-frenzy-listo" onclick="guestReadyFrenzy()" class="btn-pink" style="width: 100%; padding: 16px; margin-top: 15px; animation: latido 1.5s infinite;">¡ESTOY LISTO!</button>
             </div>
         </div>
@@ -342,6 +342,7 @@
         document.getElementById(id).innerHTML = h; 
     }
 
+    // FLUJO CLASICO
     function hostGuardarPalabras() { 
         if (modoJuego === 'clasico') {
             let p = leerInputsData('host-inputs-palabras', numPalabras, 'error-host'); if(!p) return; 
@@ -370,6 +371,7 @@
 
     function leerInputsData(id, cant, errId) { let p=[]; let e=document.getElementById(errId); for(let i=0; i<cant; i++){ let v=document.getElementById(`${id}-p${i}`).value.trim().toUpperCase(), h=document.getElementById(`${id}-h${i}`).value.trim(); if(v.length<3){ e.innerText="Mínimo 3 letras por palabra."; return null; } p.push({palabra:v, pista:h}); } e.innerText=""; return p; }
 
+    // FLUJO FRENESÍ (GUEST)
     function guestReadyFrenzy() {
         document.getElementById('btn-guest-frenzy-listo').innerText = "ESPERANDO AL HOST...";
         document.getElementById('btn-guest-frenzy-listo').disabled = true;
@@ -397,6 +399,7 @@
                     document.getElementById('caja-espera-frenesi').classList.remove('oculto');
                 }
             }
+            // HOST RECIBE ESTO EN MODO FRENÉTICO
             else if (d.tipo==='READY_FRENZY' && miRol===1) {
                 let btn = document.getElementById('btn-esperar');
                 btn.innerText="¡RIVAL LISTO! INICIAR FRENESÍ"; 
@@ -411,14 +414,17 @@
                 if(!d.death) progresoRival = d.palabras.map(p => ({ secreto:p.palabra, pista:p.pista, adivinadas:[p.palabra[0], p.palabra[p.palabra.length-1]], errL:0, errP:0, resuelta:false, fracasada:false }));
                 checkFrenzyMuerteSubita();
             }
+            // LOGICA CLASICA
             else if(d.tipo==='INIT_CLASICO' && miRol===2){ iniciarProgreso(d.palabras); conn.send({tipo:'SECRET_CLASICO', palabras:misPalabras, nombre:miNombre}); document.getElementById('caja-inputs-guest-clasico').innerHTML="<div style='padding:20px; background:#f8fafc; border-radius:16px; font-weight:800; color:var(--blue-dark); text-align:center;'>Iniciando...</div>"; }
             else if(d.tipo==='SECRET_CLASICO' && miRol===1){ iniciarProgreso(d.palabras); turnoActual=Math.random()<0.5?1:2; conn.send({tipo:'START_GAME', turno:turnoActual, palabrasHost:misPalabras}); iniciarTablero(); }
             else if(d.tipo==='START_GAME' && miRol===2){ turnoActual=d.turno; iniciarProgreso(d.palabrasHost); iniciarTablero(); }
+            // COMUNES
             else if(d.tipo==='ACCION'){ procesarRival(d); }
             else if(d.tipo==='REMATCH_REQ'){ prepararRevancha(); }
         });
     }
 
+    // --- SISTEMA FRENÉTICO ---
     function startFrenzyCountdown() {
         document.querySelectorAll('.tarjeta').forEach(e=>e.classList.add('oculto'));
         let pf = document.getElementById('pantalla-frenesi');
@@ -442,7 +448,7 @@
         document.getElementById('frenesi-inputs-area').classList.remove('oculto');
         try{ document.getElementById('frenzy-in-0').focus(); }catch(e){}
         
-        let s = 15;
+        let s = 25; // 25 SEGUNDOS AHORA
         let r = document.getElementById('frenesi-reloj');
         r.innerText = s + "s"; r.style.color = "white";
         
@@ -483,9 +489,9 @@
             if(estadoFrenzyLocal === 'MUERTO' && estadoFrenzyRival === 'MUERTO') {
                 finishMuerteSubita("EMPATE", "Ambos entraron en pánico y no escribieron NADA. 💀");
             } else if (estadoFrenzyLocal === 'MUERTO') {
-                finishMuerteSubita(nombreRival, `¡No escribiste ninguna palabra en 15s! Muerte súbita. 💀`);
+                finishMuerteSubita(nombreRival, `¡No escribiste ninguna palabra en 25s! Muerte súbita. 💀`);
             } else if (estadoFrenzyRival === 'MUERTO') {
-                finishMuerteSubita(miNombre, `¡Rival no escribió NADA en 15s! Muerte súbita. 💀`);
+                finishMuerteSubita(miNombre, `¡Rival no escribió NADA en 25s! Muerte súbita. 💀`);
             } else {
                 turnoActual = Math.random()<0.5?1:2; 
                 numPalabras = 5; 
