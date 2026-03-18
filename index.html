@@ -41,11 +41,9 @@
         input:focus { border-color: var(--blue-light); box-shadow: 0 0 8px rgba(46, 180, 230, 0.3); }
 
         .tarjeta { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.08); border: 2px solid var(--border-color); margin-bottom: 20px; }
-        
         .codigo-sala { font-family: monospace; font-size: 32px; font-weight: 900; color: var(--pink-light); background: #fff0f5; padding: 15px; border-radius: 12px; letter-spacing: 6px; border: 2px dashed var(--pink-light); display: inline-block; margin: 15px 0;}
         .alerta { color: var(--pink-light); font-size: 14px; font-weight: 700; margin: 5px 0; min-height: 20px; }
 
-        /* RELOJ */
         .caja-reloj { background: #1e293b; color: #fcd028; padding: 10px 20px; border-radius: 50px; display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 24px; margin-bottom: 15px; border: 3px solid #fcd028; box-shadow: 0 4px 0px #9a7d00; }
         .reloj-urgente { color: #f0256e !important; border-color: #f0256e !important; box-shadow: 0 4px 0px #b5003f !important; animation: latido 0.5s infinite; }
 
@@ -56,25 +54,19 @@
         .tarjeta-palabra.resuelta { border-color: #10b981; background-color: #f0fdf4; }
         .tarjeta-palabra.fracasada { border-color: var(--pink-dark); background-color: #fff0f5; }
         
-        /* NUEVA ZONA GRAFICA DE ERRORES */
         .panel-errores-grafico { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; background: #f1f5f9; padding: 12px; border-radius: 12px; }
         .fila-error-grafica { display: flex; align-items: center; gap: 10px; }
         .icono-error-tipo { font-size: 18px; width: 24px; text-align: center; }
-        
         .barra-error-contenedor { flex-grow: 1; height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; position: relative; }
         .barra-error-progreso { height: 100%; width: 0%; border-radius: 5px; transition: width 0.3s ease, background-color 0.3s ease; }
-        
         .texto-error-conteo { font-size: 12px; font-weight: 700; color: var(--text-main); width: 45px; text-align: right; font-family: monospace; }
         
-        /* Animación cuando sube el error */
         .error-incremento { animation: errorPop 0.4s ease; }
         @keyframes errorPop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
         .display-palabra { font-family: monospace; font-size: 32px; font-weight: 900; letter-spacing: 8px; text-align: center; margin: 10px 0; color: var(--text-main); }
         .texto-revelacion { color: var(--pink-dark); font-size: 18px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; }
-        
         .historial { background: #f8fafc; border-radius: 12px; padding: 15px; height: 100px; overflow-y: auto; text-align: left; font-size: 13px; border: 2px solid var(--border-color); margin-top: 15px; }
-        
         .mis-secretos { background: #fff0f5; border: 2px dashed var(--pink-light); border-radius: 12px; padding: 15px; margin-top: 15px; text-align: left;}
         .item-secreto { font-family: monospace; font-size: 16px; font-weight: bold; margin: 10px 0; padding: 10px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .item-secreto .original { font-size: 11px; color: var(--text-muted); display: block; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px; margin-bottom: 6px;}
@@ -115,7 +107,6 @@
             </select><br>
             <button onclick="hostGenerarInputs()" class="btn-yellow">Siguiente</button>
         </div>
-        
         <div id="host-paso2" class="oculto">
             <p>Código Sala:</p>
             <div class="codigo-sala" id="mostrar-codigo">...</div>
@@ -142,16 +133,13 @@
 
     <div id="pantalla-juego" class="oculto">
         <div id="reloj-visual" class="caja-reloj oculto">⏱️ <span id="timer-txt">00:00</span></div>
-        
         <div class="marcador" id="caja-marcador">
             <h2 id="titulo-turno">Espera...</h2>
             <p id="subtitulo-turno" style="font-size: 14px; font-weight: 600;">Conectando...</p>
         </div>
-
         <div id="zona-revancha" class="oculto" style="margin-bottom: 20px;">
             <button onclick="solicitarRevancha()" class="btn-yellow" style="animation: latido 1.5s infinite;">🔄 REVANCHA</button>
         </div>
-
         <div id="zona-palabras"></div>
         <div class="historial" id="historial"></div>
         <div class="mis-secretos" id="zona-mis-secretos">
@@ -160,7 +148,6 @@
         </div>
         <button onclick="location.reload()" class="btn-pink" style="margin-top: 15px; font-size: 12px;">Salir</button>
     </div>
-
 </div>
 
 <script>
@@ -169,49 +156,25 @@
     let enJuegoActivo = false, tiempoMax = 0, timerInterval = null;
     const MAX_ERR_LETRA = 10, MAX_ERR_PALABRA = 3;
 
-    // AUDIO & VIBRACIÓN MEJORADA
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     const ctx = new AudioCtx();
     function playSound(t) { if (ctx.state === 'suspended') ctx.resume(); const o = ctx.createOscillator(), g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); const n = ctx.currentTime; if (t==='acierto'){ o.type='sine'; o.frequency.setValueAtTime(880,n); g.gain.setValueAtTime(0.1,n); o.start(); o.stop(n+0.1); } else if (t==='error'){ o.type='square'; o.frequency.setValueAtTime(150,n); g.gain.setValueAtTime(0.05,n); o.start(); o.stop(n+0.2); } else if (t==='win') { [523, 659, 783].forEach((f,i)=>{ const osc=ctx.createOscillator(), ga=ctx.createGain(); osc.connect(ga); ga.connect(ctx.destination); osc.frequency.setValueAtTime(f,n+(i*0.1)); ga.gain.setValueAtTime(0.1,n+(i*0.1)); osc.start(n+(i*0.1)); osc.stop(n+(i*0.1)+0.3); }); } else if (t==='lose'){ o.type='sawtooth'; o.frequency.setValueAtTime(300,n); o.frequency.linearRampToValueAtTime(100,n+0.5); g.gain.setValueAtTime(0.1,n); o.start(); o.stop(n+0.5); } }
+    function vibrate(t) { if (!("vibrate" in navigator)) return; if (t === 'error') navigator.vibrate(100); if (t === 'aviso_10s') navigator.vibrate(400); if (t === 'aviso_3s') navigator.vibrate(200); if (t === 'tiempo_agotado') navigator.vibrate(1000); if (t === 'lose') navigator.vibrate([200, 100, 400]); }
 
-    function vibrate(t) { 
-        if (!("vibrate" in navigator)) return; 
-        if (t === 'error') navigator.vibrate(100);
-        if (t === 'aviso_10s') navigator.vibrate(400); 
-        if (t === 'aviso_3s') navigator.vibrate(200);  
-        if (t === 'tiempo_agotado') navigator.vibrate(1000); 
-        if (t === 'lose') navigator.vibrate([200, 100, 400]); 
-    }
+    function getColorBarra(actual, max) { let porc = actual / max; if (porc < 0.6) return 'var(--success-color)'; if (porc < 0.9) return 'var(--warning-color)'; return 'var(--danger-color)'; }
 
-    // LOGICA DEL RELOJ
-    function iniciarReloj() {
-        let seg = tiempoMax;
-        timerInterval = setInterval(()=>{
-            seg--;
-            let m=Math.floor(seg/60), s=seg%60;
-            document.getElementById('timer-txt').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-            if (seg === 10) { document.getElementById('reloj-visual').classList.add('reloj-urgente'); vibrate('aviso_10s'); }
-            if (seg <= 3 && seg > 0) { vibrate('aviso_3s'); }
-            if (seg <= 0) { clearInterval(timerInterval); vibrate('tiempo_agotado'); finalizarPorTiempo(); }
-        }, 1000);
-    }
-
-    function finalizarPorTiempo() { agregarLog("¡TIEMPO AGOTADO!"); decidirGanadorGlobal(); }
-
-    // --- MANEJO DE HISTORIAL ---
     try { history.replaceState({p:'i'},"", ""); } catch(e){}
-    window.addEventListener('popstate', ()=> { if (enJuegoActivo && turnoActual!==0){ if (confirm("¿Abandonar?")) location.reload(); else history.pushState({p:'j'},"","#j"); } else location.reload(); });
+    window.addEventListener('popstate', ()=> { if (enJuegoActivo && turnoActual!==0){ if (confirm("¿Abandonar?")) location.reload(); else try { history.pushState({p:'j'},"","#j"); } catch(e){} } else location.reload(); });
 
-    function generarInputs(id, cant) { let h=''; for(let i=0; i<cant; i++) h+=`<div class="caja-input-pista"><input type="text" id="${id}-p${i}" placeholder="Palabra Secreta ${i+1}" autocomplete="off" style="text-transform:uppercase; font-weight:800;"><input type="text" id="${id}-h${i}" placeholder="Pista (opcional)" style="font-size:12px;"></div>`; document.getElementById(id).innerHTML = h; }
+    function generarInputs(id, cant) { let h=''; for(let i=0; i<cant; i++) h+=`<div class="caja-input-pista"><input type="text" id="${id}-p${i}" placeholder="Palabra Secreta ${i+1}" autocomplete="off" style="text-transform:uppercase; font-weight:800;"><input type="text" id="${id}-h${i}" placeholder="💡 Pista (opcional)" style="font-size:12px;"></div>`; document.getElementById(id).innerHTML = h; }
     function leerInputs(id, cant, errId) { let p=[]; let e=document.getElementById(errId); for(let i=0; i<cant; i++){ let val=document.getElementById(`${id}-p${i}`).value.trim().toUpperCase(), hint=document.getElementById(`${id}-h${i}`).value.trim(); if(val.length<3){ e.innerText="Mínimo 3 letras."; return null; } p.push({palabra:val, pista:hint}); } e.innerText=""; return p; }
 
-    function mostrarHost() { guardarNombre(); miRol=1; document.getElementById('pantalla-inicio').classList.add('oculto'); document.getElementById('pantalla-host').classList.remove('oculto'); }
-    function mostrarGuest() { guardarNombre(); miRol=2; document.getElementById('pantalla-inicio').classList.add('oculto'); document.getElementById('pantalla-guest').classList.remove('oculto'); peer=new Peer(); }
+    function mostrarHost() { guardarNombre(); miRol=1; document.getElementById('pantalla-inicio').classList.add('oculto'); document.getElementById('pantalla-host').classList.remove('oculto'); try { history.pushState({p:'h'},"", "#host"); } catch(e){} }
+    function mostrarGuest() { guardarNombre(); miRol=2; document.getElementById('pantalla-inicio').classList.add('oculto'); document.getElementById('pantalla-guest').classList.remove('oculto'); peer=new Peer(); try { history.pushState({p:'g'},"", "#guest"); } catch(e){} }
     function guardarNombre() { let n=document.getElementById('input-nombre').value.trim(); if(n) miNombre=n; }
 
     function hostGenerarInputs() { numPalabras=parseInt(document.getElementById('host-num-palabras').value); tiempoMax=parseInt(document.getElementById('host-tiempo').value); document.getElementById('host-paso1').classList.add('oculto'); document.getElementById('host-paso2').classList.remove('oculto'); generarInputs('host-inputs-palabras', numPalabras); if(!peer){ let r=Math.random().toString(36).substring(2,6).toUpperCase(); peer=new Peer('funword-'+r); peer.on('open', id=>{ document.getElementById('mostrar-codigo').innerText=r; }); peer.on('connection', c=>{ conn=c; configurarMensajes(); document.getElementById('btn-esperar').innerText="¡Conectado! Iniciar"; document.getElementById('btn-esperar').disabled=false; }); } else { document.getElementById('btn-esperar').disabled=false; } }
     function hostGuardarPalabras() { let p=leerInputs('host-inputs-palabras', numPalabras, 'error-host'); if(!p) return; misPalabras=p; conn.send({tipo:'INIT', num:numPalabras, nombre:miNombre, tiempo:tiempoMax}); document.getElementById('btn-esperar').innerText="Esperando..."; document.getElementById('btn-esperar').disabled=true; }
-
     function guestConectar() { let c=document.getElementById('guest-codigo').value.toUpperCase(); if(!c) return; document.getElementById('error-guest-conexion').innerText="Conectando..."; conn=peer.connect('funword-'+c); conn.on('open', ()=>{ configurarMensajes(); }); peer.on('error', ()=>{ document.getElementById('error-guest-conexion').innerText="No encontrada."; }); }
     function guestGuardarPalabras() { let p=leerInputs('guest-inputs-palabras', numPalabras, 'error-guest'); if(!p) return; misPalabras=p; conn.send({tipo:'SECRET', palabras:misPalabras, nombre:miNombre}); document.getElementById('guest-paso2').innerHTML="<p>Esperando...</p>"; }
 
@@ -236,116 +199,46 @@
         dibujarTablero(); actualizarTurnoUI();
     }
 
-    // Helper para decidir el color de la barra según el progreso
-    functiongetColorBarra(actual, max) {
-        let porc = actual / max;
-        if (porc < 0.6) return 'var(--success-color)';
-        if (porc < 0.9) return 'var(--warning-color)';
-        return 'var(--danger-color)';
+    function iniciarReloj() {
+        let seg = tiempoMax;
+        timerInterval = setInterval(()=>{
+            seg--;
+            let m=Math.floor(seg/60), s=seg%60;
+            document.getElementById('timer-txt').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            if (seg === 10) { document.getElementById('reloj-visual').classList.add('reloj-urgente'); vibrate('aviso_10s'); }
+            if (seg <= 3 && seg > 0) vibrate('aviso_3s');
+            if (seg <= 0) { clearInterval(timerInterval); vibrate('tiempo_agotado'); finalizarPorTiempo(); }
+        }, 1000);
     }
+    function finalizarPorTiempo() { agregarLog("¡TIEMPO AGOTADO!"); decidirGanadorGlobal(); }
 
     function dibujarTablero() {
         let h='', t=(turnoActual===0);
         progresoRival.forEach((p, i) => {
             let rev = p.resuelta || p.fracasada || t;
             let disp = rev ? p.secreto.split('').join(' ') : p.secreto.split('').map(c=>p.adivinadas.includes(c)?c:'_').join(' ');
-            
-            // Calculo de barras gráficas
-            let porcL = (p.errL / MAX_ERR_LETRA) * 100;
-            let porcP = (p.errP / MAX_ERR_PALABRA) * 100;
-            let colorL = getColorBarra(p.errL, MAX_ERR_LETRA);
-            let colorP = getColorBarra(p.errP, MAX_ERR_PALABRA);
-
-            h += `
-            <div class="tarjeta-palabra ${p.resuelta?'resuelta':(p.fracasada?'fracasada':'')}">
-                <div style="font-size:12px;font-weight:800;color:#64748b;">PALABRA ${i+1} ${p.resuelta?'✅':(p.fracasada?'❌':'')}</div>
-                
-                <div class="panel-errores-grafico" id="panel-err-${i}">
-                    <div class="fila-error-grafica">
-                        <span class="icono-error-tipo">🅰️</span>
-                        <div class="barra-error-contenedor">
-                            <div class="barra-error-progreso" style="width: ${porcL}%; background-color: ${colorL};"></div>
-                        </div>
-                        <span class="texto-error-conteo">${p.errL}/${MAX_ERR_LETRA}</span>
-                    </div>
-                    <div class="fila-error-grafica">
-                        <span class="icono-error-tipo">📖</span>
-                        <div class="barra-error-contenedor">
-                            <div class="barra-error-progreso" style="width: ${porcP}%; background-color: ${colorP};"></div>
-                        </div>
-                        <span class="texto-error-conteo">${p.errP}/${MAX_ERR_PALABRA}</span>
-                    </div>
-                </div>
-
-                ${p.pista?`<div class="texto-pista">💡 ${p.pista}</div>`:''}<div class="display-palabra">${disp}</div>${(p.fracasada||(t&&!p.resuelta))?`<div class="texto-revelacion">Era: ${p.secreto}</div>`:''}<div class="controles-adivinar ${rev?'oculto':''}"><div class="fila-control"><input type="text" id="in-l-${i}" class="input-letra" maxlength="1"><button onclick="intentarLetra(${i})" class="btn-yellow">Letra</button></div><div class="fila-control"><input type="text" id="in-p-${i}" placeholder="Adivinar palabra completo" style="font-size:14px;"><button onclick="intentarPalabra(${i})" class="btn-blue">¡YA!</button></div></div></div>`;
+            let porcL = (p.errL / MAX_ERR_LETRA) * 100, porcP = (p.errP / MAX_ERR_PALABRA) * 100;
+            let colL = getColorBarra(p.errL, MAX_ERR_LETRA), colP = getColorBarra(p.errP, MAX_ERR_PALABRA);
+            h += `<div class="tarjeta-palabra ${p.resuelta?'resuelta':(p.fracasada?'fracasada':'')}"><div style="font-size:12px;font-weight:800;color:#64748b;">PALABRA ${i+1} ${p.resuelta?'✅':(p.fracasada?'❌':'')}</div><div class="panel-errores-grafico" id="panel-err-${i}"><div class="fila-error-grafica"><span class="icono-error-tipo">🅰️</span><div class="barra-error-contenedor"><div class="barra-error-progreso" style="width:${porcL}%; background-color:${colL};"></div></div><span class="texto-error-conteo">${p.errL}/${MAX_ERR_LETRA}</span></div><div class="fila-error-grafica"><span class="icono-error-tipo">📖</span><div class="barra-error-contenedor"><div class="barra-error-progreso" style="width:${porcP}%; background-color:${colP};"></div></div><span class="texto-error-conteo">${p.errP}/${MAX_ERR_PALABRA}</span></div></div>${p.pista?`<div class="texto-pista">💡 ${p.pista}</div>`:''}<div class="display-palabra">${disp}</div>${(p.fracasada||(t&&!p.resuelta))?`<div class="texto-revelacion">Era: ${p.secreto}</div>`:''}<div class="controles-adivinar ${rev?'oculto':''}"><div class="fila-control"><input type="text" id="in-l-${i}" class="input-letra" maxlength="1"><button onclick="intentarLetra(${i})" class="btn-yellow">Letra</button></div><div class="fila-control"><input type="text" id="in-p-${i}" placeholder="¡Adivinar!" style="font-size:14px;"><button onclick="intentarPalabra(${i})" class="btn-blue">YA</button></div></div></div>`;
         });
         document.getElementById('zona-palabras').innerHTML = h;
-        
-        h=''; estadoMisPalabras.forEach((p,i)=>{
-            let d = p.secreto.split('').map(c=>(p.adivinadas.includes(c)||p.resuelta||p.fracasada)?c:'_').join(' ');
-            h += `<div class="item-secreto"><span class="original">Tú pusiste: <b>${p.secreto}</b></span>Rival: ${d} ${p.resuelta?'✅':(p.fracasada?'❌':'⏳')}</div>`;
-        });
+        h=''; estadoMisPalabras.forEach((p,i)=>{ let d = p.secreto.split('').map(c=>(p.adivinadas.includes(c)||p.resuelta||p.fracasada)?c:'_').join(' '); h += `<div class="item-secreto"><span class="original">Pusiste: <b>${p.secreto}</b></span>Rival: ${d} ${p.resuelta?'✅':(p.fracasada?'❌':'⏳')}</div>`; });
         document.getElementById('lista-mis-secretos').innerHTML = h;
     }
 
-    function actualizarTurnoUI() {
-        if (turnoActual===0) return;
-        let mio = (numPalabras===1)?(turnoActual===miRol):true;
-        progresoRival.forEach((p,i)=>{ let l=document.getElementById(`in-l-${i}`), pl=document.getElementById(`in-p-${i}`), bs=document.querySelectorAll(`.tarjeta-palabra:nth-child(${i+1}) button`); if(l){ l.disabled=!mio; pl.disabled=!mio; bs.forEach(b=>b.disabled=!mio); } });
-        const marc = document.getElementById('caja-marcador');
-        if(numPalabras>1){ marc.className="marcador carrera"; document.getElementById('titulo-turno').innerText="¡DUELO!"; document.getElementById('subtitulo-turno').innerText="¡Rápido y preciso!"; }
-        else { marc.className="marcador"; if(mio){ document.getElementById('titulo-turno').innerText="¡Tu turno!"; marc.style.backgroundColor="var(--blue-light)"; } else { document.getElementById('titulo-turno').innerText=`Turno de ${nombreRival}`; marc.style.backgroundColor="var(--pink-light)"; } }
-    }
-
-    // Animación visual para el error
-    function animarErrorGrafico(idx) {
-        let panel = document.getElementById(`panel-err-${idx}`);
-        if(panel){
-            panel.classList.add('error-incremento');
-            setTimeout(()=> panel.classList.remove('error-incremento'), 400);
-        }
-    }
+    function actualizarTurnoUI() { if (turnoActual===0) return; let mio = (numPalabras===1)?(turnoActual===miRol):true; progresoRival.forEach((p,i)=>{ let l=document.getElementById(`in-l-${i}`), pl=document.getElementById(`in-p-${i}`), bs=document.querySelectorAll(`.tarjeta-palabra:nth-child(${i+1}) button`); if(l){ l.disabled=!mio; pl.disabled=!mio; bs.forEach(b=>b.disabled=!mio); } }); const marc = document.getElementById('caja-marcador'); if(numPalabras>1){ marc.className="marcador carrera"; document.getElementById('titulo-turno').innerText="¡DUELO!"; document.getElementById('subtitulo-turno').innerText="¡Rápido y preciso!"; } else { marc.className="marcador"; if(mio){ document.getElementById('titulo-turno').innerText="¡Tu turno!"; marc.style.backgroundColor="var(--blue-light)"; } else { document.getElementById('titulo-turno').innerText=`Turno de ${nombreRival}`; marc.style.backgroundColor="var(--pink-light)"; } } }
+    function animarErrorGrafico(idx) { let p = document.getElementById(`panel-err-${idx}`); if(p){ p.classList.add('error-incremento'); setTimeout(()=> p.classList.remove('error-incremento'), 400); } }
 
     function intentarLetra(idx) { let o=progresoRival[idx], i=document.getElementById(`in-l-${idx}`), v=i.value.trim().toUpperCase(); i.value=""; if(!v||o.adivinadas.includes(v))return; let a=o.secreto.includes(v); if(a){ playSound('acierto'); o.adivinadas.push(v); if(o.secreto.split('').every(c=>o.adivinadas.includes(c))) o.resuelta=true; } else { playSound('error'); vibrate('error'); o.errL++; animarErrorGrafico(idx); } enviarYProcesar('L', idx, v, a, o); }
     function intentarPalabra(idx) { let o=progresoRival[idx], i=document.getElementById(`in-p-${idx}`), v=i.value.trim().toUpperCase(); i.value=""; if(v.length<3)return; let a=(v===o.secreto); if(a){ playSound('acierto'); o.resuelta=true; } else { playSound('error'); vibrate('error'); o.errP++; animarErrorGrafico(idx); } enviarYProcesar('P', idx, v, a, o); }
 
-    function enviarYProcesar(tipo, idx, val, acierto, obj) {
-        if (obj.errL>=MAX_ERR_LETRA || obj.errP>=MAX_ERR_PALABRA) obj.fracasada=true;
-        let fin='NADA'; const s = calcStats(progresoRival);
-        if(numPalabras===1) { if(obj.resuelta) fin='WIN'; else if(obj.fracasada) fin='LOSE'; else turnoActual=(turnoActual===1?2:1); }
-        else { if(s.g >= Math.floor(numPalabras/2)+1 || s.t === numPalabras) fin='CHECK'; }
-        conn.send({tipo:'ACCION', idx:idx, val:val, acierto:acierto, fin:fin, s:s});
-        if(fin!=='NADA') decidirGanadorGlobal(); else { dibujarTablero(); actualizarTurnoUI(); }
-    }
-
-    function procesarAccionRival(d) {
-        let miP = estadoMisPalabras[d.idx]; if(d.fin==='CHECK'||d.fin==='WIN'||d.fin==='LOSE'){ decidirGanadorGlobal(); return; }
-        if(d.acierto){ miP.adivinadas.push(...d.val.split('')); if(miP.secreto.split('').every(c=>miP.adivinadas.includes(c))) miP.resuelta=true; }
-        miP.errL = d.s.errL; miP.errP = d.s.errP; if(miP.errL>=MAX_ERR_LETRA || miP.errP>=MAX_ERR_PALABRA) miP.fracasada=true;
-        dibujarTablero(); if(numPalabras===1) turnoActual=miRol; actualizarTurnoUI();
-    }
-
+    function enviarYProcesar(tipo, idx, val, acierto, obj) { if (obj.errL>=MAX_ERR_LETRA || obj.errP>=MAX_ERR_PALABRA) obj.fracasada=true; let fin='NADA'; const s = calcStats(progresoRival); if(numPalabras===1) { if(obj.resuelta) fin='WIN'; else if(obj.fracasada) fin='LOSE'; else turnoActual=(turnoActual===1?2:1); } else { if(s.g >= Math.floor(numPalabras/2)+1 || s.t === numPalabras) fin='CHECK'; } conn.send({tipo:'ACCION', idx:idx, val:val, acierto:acierto, fin:fin, s:s}); if(fin!=='NADA') decidirGanadorGlobal(); else { dibujarTablero(); actualizarTurnoUI(); } }
+    function procesarAccionRival(d) { let miP = estadoMisPalabras[d.idx]; if(d.fin==='CHECK'||d.fin==='WIN'||d.fin==='LOSE'){ decidirGanadorGlobal(); return; } if(d.acierto){ miP.adivinadas.push(...d.val.split('')); if(miP.secreto.split('').every(c=>miP.adivinadas.includes(c))) miP.resuelta=true; } miP.errL = d.s.errL; miP.errP = d.s.errP; if(miP.errL>=MAX_ERR_LETRA || miP.errP>=MAX_ERR_PALABRA) miP.fracasada=true; dibujarTablero(); if(numPalabras===1) turnoActual=miRol; actualizarTurnoUI(); }
     function calcStats(p) { return { g:p.filter(x=>x.resuelta).length, t:p.filter(x=>x.resuelta||x.fracasada).length, errL:p.reduce((a,b)=>a+b.errL,0), errP:p.reduce((a,b)=>a+b.errP,0) }; }
 
-    function decidirGanadorGlobal() {
-        clearInterval(timerInterval);
-        const m=calcStats(progresoRival), r=calcStats(estadoMisPalabras);
-        let g="", rz="";
-        if(m.g > r.g){ g=miNombre; rz=`¡Más aciertos! (${m.g} vs ${r.g})`; }
-        else if(r.g > m.g){ g=nombreRival; rz=`${nombreRival} ganó (${r.g} vs ${m.g})`; }
-        else { const eM=m.errL+(m.errP*2), eR=r.errL+(r.errP*2); if(eM<eR){ g=miNombre; rz="¡Ganaste por precisión!"; } else if(eR<eM){ g=nombreRival; rz=`${nombreRival} fue más preciso.`; } else { g="EMPATE"; rz="Empate total."; } }
-        terminarJuego(g, rz);
-    }
+    function decidirGanadorGlobal() { clearInterval(timerInterval); const m=calcStats(progresoRival), r=calcStats(estadoMisPalabras); let g="", rz=""; if(m.g > r.g){ g=miNombre; rz=`¡Más aciertos! (${m.g} vs ${r.g})`; } else if(r.g > m.g){ g=nombreRival; rz=`${nombreRival} ganó (${r.g} vs ${m.g})`; } else { const eM=m.errL+(m.errP*2), eR=r.errL+(r.errP*2); if(eM<eR){ g=miNombre; rz="¡Ganaste por precisión!"; } else if(eR<eM){ g=nombreRival; rz=`${nombreRival} fue más preciso.`; } else { g="EMPATE"; rz="Duelo igualado."; } } terminarJuego(g, rz); }
 
-    function terminarJuego(ganador, msj) {
-        enJuegoActivo=false; turnoActual=0; document.getElementById('zona-revancha').classList.remove('oculto');
-        const tit = document.getElementById('titulo-turno');
-        if(ganador===miNombre){ tit.innerText="¡VICTORIA! 🎉"; playSound('win'); confetti({particleCount:200, spread:100}); }
-        else if(ganador==="EMPATE"){ tit.innerText="¡EMPATE! 🤝"; }
-        else { tit.innerText=`GANÓ ${ganador.toUpperCase()}`; playSound('lose'); vibrate('lose'); }
-        document.getElementById('subtitulo-turno').innerText=msj; dibujarTablero();
-    }
-
+    function terminarJuego(ganador, msj) { enJuegoActivo=false; turnoActual=0; document.getElementById('zona-revancha').classList.remove('oculto'); const tit = document.getElementById('titulo-turno'); if(ganador===miNombre){ tit.innerText="¡VICTORIA! 🎉"; playSound('win'); confetti({particleCount:200, spread:100}); } else if(ganador==="EMPATE"){ tit.innerText="¡EMPATE! 🤝"; } else { tit.innerText=`GANÓ ${ganador.toUpperCase()}`; playSound('lose'); vibrate('lose'); } document.getElementById('subtitulo-turno').innerText=msj; dibujarTablero(); }
     function solicitarRevancha() { conn.send({tipo:'REMATCH_REQ'}); prepararRevancha(); }
     function prepararRevancha() { clearInterval(timerInterval); enJuegoActivo=false; document.getElementById('pantalla-juego').classList.add('oculto'); if(miRol===1){ document.getElementById('pantalla-host').classList.remove('oculto'); document.getElementById('host-paso1').classList.remove('oculto'); document.getElementById('host-paso2').classList.add('oculto'); } else { document.getElementById('pantalla-guest').classList.remove('oculto'); document.getElementById('guest-paso2').classList.remove('oculto'); document.getElementById('btn-guest-listo').classList.add('oculto'); } }
     function agregarLog(t) { let d=document.createElement('div'); d.innerText=t; let h=document.getElementById('historial'); h.appendChild(d); h.scrollTop=h.scrollHeight; }
