@@ -151,22 +151,33 @@
         <div id="host-paso1">
             <h2 style="margin: 0 0 20px 0; font-size: 22px; font-weight: 900; color: var(--blue-dark);">Configurar Partida</h2>
             
+            <div style="text-align: left; margin-bottom: 15px;">
+                <label class="label-modern">👥 Cantidad de Jugadores</label>
+                <select id="host-num-personas" onchange="actualizarModos()" style="border-color: var(--blue-light); color: var(--blue-dark); font-weight: 900;">
+                    <option value="2">2 Personas (1 vs 1)</option>
+                    <option value="3">3 Personas</option>
+                    <option value="4">4 Personas</option>
+                    <option value="5">5 Personas</option>
+                    <option value="6">6 Personas</option>
+                </select>
+            </div>
+
             <div style="text-align: left; margin-bottom: 15px; background: #f1f5f9; padding: 15px; border-radius: 16px; border: 2px dashed var(--blue-light);">
                 <label class="label-modern" style="color: var(--blue-dark);">🎮 Modo de Juego</label>
                 <select id="host-modo" onchange="toggleModo()" style="border-color: var(--blue-light); color: var(--blue-dark); font-weight: 900;">
                     <option value="clasico">🛡️ Clásico (Estratégico)</option>
                     <option value="frenetico">🔥 Frenético (Muerte Súbita)</option>
                 </select>
-                <p id="desc-frenetico" class="oculto" style="font-size: 11px; font-weight: 700; color: var(--pink-dark); margin: 8px 0 0 0;">¡25 segundos para armar defensas! El que no escribe, PIERDE al instante.</p>
+                <p id="desc-modo" class="oculto" style="font-size: 11px; font-weight: 700; color: var(--pink-dark); margin: 8px 0 0 0;"></p>
             </div>
 
             <div style="text-align: left; margin-bottom: 15px;">
-                <label class="label-modern">🔢 Número de Palabras</label>
+                <label class="label-modern">🔢 Número de Palabras (Por Jugador)</label>
                 <select id="host-num-palabras">
                     <option value="1">1 Palabra</option>
-                    <option value="2">2 Palabras (Duelo)</option>
-                    <option value="3">3 Palabras (Carrera)</option>
-                    <option value="5">5 Palabras (Épico)</option>
+                    <option value="2">2 Palabras</option>
+                    <option value="3">3 Palabras</option>
+                    <option value="5">5 Palabras</option>
                 </select>
             </div>
             <div style="text-align: left; margin-bottom: 25px;">
@@ -270,8 +281,9 @@
     let peer = null, conn = null, miRol = 0, miNombre = "Jugador", nombreRival = "Rival";
     let numPalabras = 1, turnoActual = 1, misPalabras = [], progresoRival = [], estadoMisPalabras = [];
     let enJuegoActivo = false, tiempoMax = 0, timerInterval = null;
-    let modoJuego = 'clasico'; // 'clasico' | 'frenetico'
+    let modoJuego = 'clasico'; 
     let frenzyTimer = null, estadoFrenzyLocal = null, estadoFrenzyRival = null;
+    let maxJugadores = 2; // Variable para la lógica futura de multijugador
 
     const MAX_ERR_LETRA = 10, MAX_ERR_PALABRA = 3;
 
@@ -291,30 +303,20 @@
 
     function getColorBarra(actual, max) { let p = actual/max; if(p<0.6) return 'var(--success-color)'; if(p<0.9) return 'var(--warning-color)'; return 'var(--danger-color)'; }
 
-    // --- NUEVO: FUNCIONES DE COMPARTIR ---
     function copiarCodigo() {
         let code = document.getElementById('mostrar-codigo').innerText;
-        navigator.clipboard.writeText(code).then(() => {
-            alert("¡Código copiado: " + code + "!");
-        });
+        navigator.clipboard.writeText(code).then(() => { alert("¡Código copiado: " + code + "!"); });
     }
 
     function compartirCodigo() {
         let code = document.getElementById('mostrar-codigo').innerText;
         let texto = `¡Únete a mi partida! El código secreto es: ${code}`;
-        
         if (navigator.share) {
-            // Usa el popup nativo del celular (no te saca del navegador)
-            navigator.share({
-                title: 'Juego de Palabras',
-                text: texto
-            }).catch(err => console.log('Error compartiendo:', err));
+            navigator.share({ title: 'Juego de Palabras', text: texto }).catch(err => console.log('Error:', err));
         } else {
-            // Si el celular es muy viejo, usa un link (puede requerir recarga al volver)
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`, '_blank');
         }
     }
-    // ------------------------------------
 
     function guardarNombre() { let n = document.getElementById('input-nombre').value.trim(); if(n) miNombre = n; }
     
@@ -322,6 +324,7 @@
         guardarNombre(); miRol=1; 
         document.getElementById('pantalla-inicio').classList.add('oculto'); 
         document.getElementById('pantalla-host').classList.remove('oculto'); 
+        actualizarModos(); // Llama a la funcion para setear los menus correctamente
         try { history.pushState({p:'host'}, "", "#host"); } catch(e){}
     }
     
@@ -355,18 +358,62 @@
         if(timerInterval) clearInterval(timerInterval);
     }
 
+    // --- NUEVO: LÓGICA DINÁMICA DEL MENÚ ---
+    function actualizarModos() {
+        const numPersonas = parseInt(document.getElementById('host-num-personas').value);
+        const selectModo = document.getElementById('host-modo');
+        
+        let opcionesHTML = '';
+        
+        if (numPersonas === 2) {
+            opcionesHTML = `
+                <option value="clasico">🛡️ Clásico (Estratégico)</option>
+                <option value="frenetico">🔥 Frenético (Muerte Súbita)</option>
+            `;
+        } else {
+            opcionesHTML = `
+                <option value="jefe">👑 Jefe vs Escuadrón</option>
+                <option value="batalla">⚔️ Batalla Real</option>
+                <option value="cadena">🔗 Ataque en Cadena</option>
+            `;
+        }
+        
+        selectModo.innerHTML = opcionesHTML;
+        toggleModo(); // Actualiza los textos de ayuda
+    }
+
     function toggleModo() {
         modoJuego = document.getElementById('host-modo').value;
         let selectNum = document.getElementById('host-num-palabras');
-        let desc = document.getElementById('desc-frenetico');
+        let desc = document.getElementById('desc-modo');
+        
+        selectNum.disabled = false;
+        desc.classList.add('oculto');
+        desc.style.color = "var(--pink-dark)";
+
         if (modoJuego === 'frenetico') {
-            selectNum.value = "5"; selectNum.disabled = true; desc.classList.remove('oculto');
-        } else {
-            selectNum.disabled = false; desc.classList.add('oculto');
+            selectNum.value = "5"; 
+            selectNum.disabled = true; 
+            desc.innerText = "¡25 segundos para armar defensas! El que no escribe, PIERDE al instante.";
+            desc.classList.remove('oculto');
+        } else if (modoJuego === 'jefe') {
+            desc.innerText = "Un jugador define el código, los demás compiten por adivinarlo primero.";
+            desc.style.color = "var(--blue-dark)";
+            desc.classList.remove('oculto');
+        } else if (modoJuego === 'batalla') {
+            desc.innerText = "Todos escriben. Todas las palabras se mezclan. ¡Sobrevive el que adivine más!";
+            desc.style.color = "var(--blue-dark)";
+            desc.classList.remove('oculto');
+        } else if (modoJuego === 'cadena') {
+            desc.innerText = "Cada jugador ataca a la persona de su derecha. ¡No rompas la cadena!";
+            desc.style.color = "var(--blue-dark)";
+            desc.classList.remove('oculto');
         }
     }
+    // ---------------------------------------
 
     function hostGenerarInputs() { 
+        maxJugadores = parseInt(document.getElementById('host-num-personas').value);
         modoJuego = document.getElementById('host-modo').value;
         numPalabras = parseInt(document.getElementById('host-num-palabras').value);
         tiempoMax = parseInt(document.getElementById('host-tiempo').value);
@@ -751,6 +798,9 @@
             volverAlInicio();
         }
     });
+
+    // INICIALIZAR EL MENÚ
+    actualizarModos();
 </script>
 
 </body>
