@@ -24,7 +24,6 @@
             --success-color: #10b981; --warning-color: #f59e0b; --danger-color: #ef4444;
         }
 
-        /* ESCUDO ANTIRRECARGAS */
         html, body { overscroll-behavior-y: none; }
 
         body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top, #e0f2fe, var(--bg-body)); color: var(--text-main); text-align: center; margin: 0; padding: 20px 15px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
@@ -33,7 +32,6 @@
 
         .logo-img { max-height: 110px; margin-bottom: 15px; object-fit: contain; filter: drop-shadow(0 8px 8px rgba(0,0,0,0.1)); }
         
-        /* BOTONES PREMIUM */
         button { border: none; border-radius: 50px; font-weight: 800; color: white; cursor: pointer; transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); text-transform: uppercase; letter-spacing: 1px; }
         button:active { transform: translateY(6px); }
         button:disabled { filter: grayscale(100%); opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none !important; }
@@ -50,25 +48,21 @@
         .btn-green { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 6px 0px #047857, 0 10px 20px rgba(16, 185, 129, 0.3); color: white; text-shadow: 1px 1px 0px rgba(0,0,0,0.2); }
         .btn-green:active { box-shadow: 0 0px 0px #047857, 0 4px 10px rgba(16, 185, 129, 0.3); }
 
-        /* INPUTS GLOBALES */
         input[type="text"], input[type="number"], select { padding: 14px 16px; border-radius: 16px; border: 2px solid #cbd5e1; box-sizing: border-box; font-family: 'Poppins', sans-serif; text-align: center; outline: none; transition: 0.2s; font-size: 16px; font-weight: 600; color: var(--text-main); background: #f8fafc; width: 100%; }
         input:focus, select:focus { border-color: var(--blue-light); background: #fff; box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2); }
         select:disabled { opacity: 0.5; background: #e2e8f0; }
         
         .label-modern { display: block; text-align: left; font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* TARJETAS Y CONTENEDORES */
         .tarjeta { background: white; padding: 25px 20px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
         .codigo-sala { font-family: monospace; font-size: 36px; font-weight: 900; color: var(--pink-dark); background: #fff1f2; padding: 15px; border-radius: 16px; letter-spacing: 10px; display: inline-block; margin: 10px 0 20px 0; border: 2px dashed var(--pink-light); }
         .alerta { color: var(--pink-light); font-size: 13px; font-weight: 700; margin: 8px 0; min-height: 20px; }
 
-        /* ANIMACIONES DE ENTRADA */
         @keyframes fadeInSlide { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeInSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        /* ZONA DE JUEGO & TARJETAS DE PALABRAS */
         .caja-reloj { background: #1e293b; color: var(--yellow-light); padding: 8px 24px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px; font-weight: 900; font-size: 22px; margin-bottom: 15px; border: 3px solid var(--yellow-light); box-shadow: 0 6px 0px #0f172a; }
         .reloj-urgente { color: var(--pink-light) !important; border-color: var(--pink-light) !important; animation: latido 0.5s infinite; }
         
@@ -80,7 +74,6 @@
         .tarjeta-palabra.resuelta { border-color: var(--success-color); background-color: #f0fdf4; border-width: 3px;}
         .tarjeta-palabra.fracasada { border-color: var(--pink-dark); background-color: #fff1f2; border-width: 3px;}
 
-        /* BARRAS GRÁFICAS */
         .panel-errores-grafico { display: flex; gap: 12px; margin-bottom: 15px; background: #f8fafc; padding: 12px; border-radius: 16px; border: 1px solid var(--border-color); }
         .bloque-error { flex: 1; display: flex; flex-direction: column; gap: 6px; }
         .barra-mini-contenedor { height: 8px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
@@ -91,7 +84,6 @@
         .display-palabra { font-family: monospace; font-size: 30px; font-weight: 900; letter-spacing: 6px; text-align: center; margin: 15px 0; color: var(--text-main); word-break: break-all; }
         .texto-revelacion { color: var(--pink-dark); font-size: 18px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; background: #fff1f2; padding: 5px; border-radius: 8px;}
         
-        /* CONTROLES COMPACTOS */
         .panel-mando { background: #f1f5f9; padding: 15px; border-radius: 20px; border: 2px dashed #cbd5e1; display: flex; flex-direction: column; gap: 12px; align-items: center; }
         .fila-mando { display: flex; gap: 8px; justify-content: center; align-items: center; width: 100%; flex-wrap: wrap; }
         
@@ -101,10 +93,9 @@
         .input-p-mini { width: 160px !important; height: 45px !important; padding: 0 10px !important; font-size: 14px !important; font-weight: 800; border-radius: 14px !important; border: 3px solid var(--blue-light) !important; margin: 0 !important; text-transform: uppercase; box-shadow: 0 4px 0 rgba(0,0,0,0.05);}
         .btn-p-mini { margin: 0 !important; height: 45px; padding: 0 20px !important; font-size: 14px !important; border-radius: 50px !important; border: none !important; }
 
-        /* HISTORIAL ATRACTIVO */
         .caja-historial-container { background: #fff; border-radius: 20px; padding: 15px; border: 2px solid var(--border-color); margin-top: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.03); text-align: left;}
         .caja-historial-container h3 { margin: 0 0 10px 0; font-size: 12px; text-transform: uppercase; color: var(--text-muted); text-align: center; font-weight: 900; letter-spacing: 1px; }
-        .historial { height: 120px; overflow-y: auto; padding-right: 5px; }
+        .historial { height: 160px; overflow-y: auto; padding-right: 5px; }
         .historial::-webkit-scrollbar { width: 6px; }
         .historial::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .historial::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -113,12 +104,10 @@
         .log-error { border-left-color: var(--pink-light); background: #fff1f2; }
         .log-success { border-left-color: var(--success-color); background: #f0fdf4; }
 
-        /* INFO INFERIOR */
         .mis-secretos { background: #fff; border: 2px dashed var(--pink-light); border-radius: 20px; padding: 15px; margin-top: 20px; text-align: left; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.05);}
         .item-secreto { font-family: monospace; font-size: 15px; font-weight: 900; margin: 10px 0; padding: 10px 12px; background: #f8fafc; border-radius: 12px; border: 1px solid var(--border-color); }
         .original { font-size: 11px; color: var(--text-muted); display: block; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; font-family: 'Poppins', sans-serif; letter-spacing: normal; text-transform: uppercase;}
 
-        /* PANTALLA FRENESÍ */
         #pantalla-frenesi { background: linear-gradient(135deg, var(--pink-dark), var(--pink-shadow)); color: white; border: none; box-shadow: 0 15px 30px rgba(225, 29, 72, 0.4); }
         #frenesi-reloj { font-size: 70px; font-weight: 900; margin: 10px 0; text-shadow: 2px 4px 0 rgba(0,0,0,0.3); }
 
@@ -205,7 +194,7 @@
                 <div id="host-inputs-palabras" style="width: 100%; margin-bottom: 15px;"></div>
             </div>
             <p id="error-host" class="alerta"></p>
-            <button id="btn-esperar" onclick="hostGuardarPalabras()" class="btn-blue" style="width: 100%; padding: 16px;" disabled>Iniciando servidor...</button>
+            <button id="btn-esperar" onclick="hostGuardarPalabras()" class="btn-blue" style="width: 100%; padding: 16px;" disabled>Esperando Conexión...</button>
         </div>
     </div>
 
@@ -263,13 +252,13 @@
         </div>
 
         <div id="zona-revancha" class="oculto fade-in" style="margin-bottom: 20px;">
-            <button onclick="solicitarRevancha()" class="btn-yellow" style="width: 100%; padding: 18px; font-size: 18px; animation: latido 1.5s infinite;">🔄 ¡JUGAR REVANCHA!</button>
+            <button onclick="solicitarRevancha()" class="btn-yellow" style="width: 100%; padding: 18px; font-size: 18px; animation: latido 1.5s infinite;">🔄 ¡NUEVA PARTIDA!</button>
         </div>
 
         <div id="zona-palabras"></div>
 
         <div class="caja-historial-container">
-            <h3>📜 Historial de Jugadas</h3>
+            <h3 id="titulo-historial">📜 Historial de Jugadas</h3>
             <div class="historial" id="historial"></div>
         </div>
         
@@ -292,8 +281,8 @@
     
     // --- VARIABLES MULTIJUGADOR ---
     let maxJugadores = 2;
-    let conexionesHost = []; // El Host guarda aquí todas las conexiones de los invitados
-    let invitadosListos = 0; // Contador para saber si todos enviaron sus palabras
+    let conexionesHost = []; 
+    let invitadosListos = 0; 
     let hostGuardoPalabras = false;
 
     const MAX_ERR_LETRA = 10, MAX_ERR_PALABRA = 3;
@@ -377,7 +366,7 @@
         if (numPersonas === 2) {
             opcionesHTML = `<option value="clasico">🛡️ Clásico (Estratégico)</option><option value="frenetico">🔥 Frenético (Muerte Súbita)</option>`;
         } else {
-            opcionesHTML = `<option value="jefe">👑 Jefe vs Escuadrón</option><option value="batalla">⚔️ Batalla Real</option><option value="cadena">🔗 Ataque en Cadena</option>`;
+            opcionesHTML = `<option value="jefe">👑 Jefe vs Escuadrón</option><option value="batalla">⚔️ Batalla Real (Próximamente)</option><option value="cadena">🔗 Ataque en Cadena (Próximamente)</option>`;
         }
         
         selectModo.innerHTML = opcionesHTML;
@@ -398,16 +387,12 @@
             desc.innerText = "¡25 segundos para armar defensas! El que no escribe, PIERDE al instante.";
             desc.classList.remove('oculto');
         } else if (modoJuego === 'jefe') {
-            desc.innerText = "Tú (Jefe) escribes el código. El escuadrón compite por descifrarlo primero.";
+            desc.innerText = "Tú (Jefe) escribes las palabras. El escuadrón compite por descifrarlas primero.";
             desc.style.color = "var(--blue-dark)";
             desc.classList.remove('oculto');
-        } else if (modoJuego === 'batalla') {
-            desc.innerText = "Todos escriben. Todas las palabras se mezclan en una piscina central.";
-            desc.style.color = "var(--blue-dark)";
-            desc.classList.remove('oculto');
-        } else if (modoJuego === 'cadena') {
-            desc.innerText = "Cada jugador ataca a la persona conectada a su derecha.";
-            desc.style.color = "var(--blue-dark)";
+        } else if (modoJuego === 'batalla' || modoJuego === 'cadena') {
+            desc.innerText = "Estamos construyendo este modo masivo. ¡Juega Modo Jefe mientras tanto!";
+            desc.style.color = "var(--text-muted)";
             desc.classList.remove('oculto');
         }
     }
@@ -415,6 +400,12 @@
     function hostGenerarInputs() { 
         maxJugadores = parseInt(document.getElementById('host-num-personas').value);
         modoJuego = document.getElementById('host-modo').value;
+        
+        if(modoJuego === 'batalla' || modoJuego === 'cadena') {
+            alert("Este modo estará disponible en la próxima actualización. Por favor, elige Modo Jefe.");
+            return;
+        }
+
         numPalabras = parseInt(document.getElementById('host-num-palabras').value);
         tiempoMax = parseInt(document.getElementById('host-tiempo').value);
         
@@ -424,7 +415,6 @@
         
         let btnEspera = document.getElementById('btn-esperar');
         
-        // MODO JEFE Y CLÁSICO MUESTRAN INPUTS AL HOST. MODO FRENÉTICO LOS OCULTA.
         if (modoJuego !== 'frenetico') {
             document.getElementById('caja-inputs-host-clasico').classList.remove('oculto');
             generarInputsHtml('host-inputs-palabras', numPalabras);
@@ -442,14 +432,13 @@
             peer = new Peer('funword-'+r);
             peer.on('open', id => document.getElementById('mostrar-codigo').innerText = r);
             
-            // EL HOST ESCUCHA MÚLTIPLES CONEXIONES
             peer.on('connection', c => { 
-                conn = c; // Mantenemos compatibilidad con 1v1
+                conn = c; 
                 conexionesHost.push(c);
                 
                 c.on('open', () => {
-                    configMensajes(c); // Pasamos la conexión específica
-                    actualizarBotonHost(); // Verificamos si ya hay suficientes jugadores
+                    configMensajes(c); 
+                    actualizarBotonHost(); 
                 });
             });
         }
@@ -460,7 +449,6 @@
         document.getElementById(id).innerHTML = h; 
     }
 
-    // --- EL CEREBRO DEL BOTÓN DEL HOST ---
     function actualizarBotonHost() {
         if (!hostGuardoPalabras && modoJuego !== 'frenetico') return; 
 
@@ -468,11 +456,10 @@
         let invitadosNecesarios = maxJugadores - 1;
 
         if (modoJuego === 'jefe') {
-            // En modo Jefe, solo se necesita que se conecten, no tienen que escribir palabras
             if (conexionesHost.length >= invitadosNecesarios) {
                 btn.innerText = "¡ESCUADRÓN LISTO! INICIAR PARTIDA";
                 btn.disabled = false;
-                btn.onclick = iniciarPartidaJefe; // Próximamente la función real
+                btn.onclick = iniciarPartidaJefe;
             } else {
                 btn.innerText = `Esperando a ${invitadosNecesarios - conexionesHost.length} jugador(es)...`;
                 btn.disabled = true;
@@ -486,7 +473,6 @@
                 btn.innerText = `Esperando a ${invitadosNecesarios - conexionesHost.length} jugador(es)...`;
             }
         } else {
-            // Clásico, Batalla o Cadena: Requieren que todos escriban y guarden (GUEST_READY)
             if (invitadosListos >= invitadosNecesarios) {
                 btn.innerText = "¡TODOS LISTOS! INICIAR PARTIDA";
                 btn.disabled = false;
@@ -511,18 +497,36 @@
         actualizarBotonHost();
     }
 
-    // Funciones temporales para iniciar partida (Para que no de error el botón)
-    function iniciarPartidaJefe() { alert("El Modo Jefe está en construcción. ¡Solo arreglamos el Menú por ahora!"); }
+    function iniciarPartidaJefe() {
+        // Envia el banderazo de salida a todos los invitados
+        conexionesHost.forEach(c => c.send({tipo: 'START_JEFE', palabrasHost: misPalabras}));
+        
+        enJuegoActivo = true;
+        document.querySelectorAll('.tarjeta, #pantalla-inicio').forEach(e=>e.classList.add('oculto')); 
+        document.getElementById('pantalla-juego').classList.remove('oculto');
+        
+        document.getElementById('titulo-turno').innerText = "¡ERES EL JEFE!";
+        document.getElementById('subtitulo-turno').innerText = "Observa al escuadrón intentar descifrar tus palabras.";
+        document.getElementById('caja-marcador').className = "marcador";
+        document.getElementById('titulo-historial').innerText = "🚨 Actividad del Escuadrón";
+        
+        document.getElementById('zona-palabras').innerHTML = ""; // El Host no adivina en este modo
+        
+        let h=''; misPalabras.forEach((p)=>{
+            h += `<div class="item-secreto"><span class="original">Defendiendo: <b>${p.palabra}</b></span> <span style="font-size:12px; color:var(--text-muted);">(💡 ${p.pista || 'Sin pista'})</span></div>`;
+        });
+        document.getElementById('lista-mis-secretos').innerHTML = h;
+        
+        if(tiempoMax>0) { document.getElementById('reloj-visual').classList.remove('oculto'); startTimer(); }
+    }
+
     function iniciarPartidaNormal() { 
         if(maxJugadores === 2) {
             turnoActual=Math.random()<0.5?1:2; 
             conn.send({tipo:'START_GAME', turno:turnoActual, palabrasHost:misPalabras}); 
             iniciarTablero();
-        } else {
-            alert("Modo Masivo en construcción.");
         }
     }
-    // --------------------------------------
 
     function guestConectar() { 
         let c = document.getElementById('guest-codigo').value.toUpperCase(); if(!c) return; 
@@ -564,19 +568,16 @@
                 document.getElementById('guest-paso1').classList.add('oculto'); document.getElementById('guest-paso2').classList.remove('oculto');
                 try { history.pushState({p:'espera'}, "", "#espera"); } catch(e){}
 
-                // Resetear todas las cajas
                 document.getElementById('caja-inputs-guest-clasico').classList.add('oculto');
                 document.getElementById('caja-espera-frenesi').classList.add('oculto');
                 document.getElementById('caja-espera-jefe').classList.add('oculto');
                 document.getElementById('guest-info-modo').classList.add('oculto');
 
-                // Lógica Inteligente para el Guest
                 if (modoJuego === 'frenetico') {
                     document.getElementById('caja-espera-frenesi').classList.remove('oculto');
                 } else if (modoJuego === 'jefe') {
                     document.getElementById('caja-espera-jefe').classList.remove('oculto');
                 } else {
-                    // Clásico, Batalla, Cadena (Todos requieren que el invitado escriba)
                     document.getElementById('guest-info-modo').innerText = `Jugaremos con ${numPalabras} palabras.`;
                     document.getElementById('guest-info-modo').classList.remove('oculto');
                     document.getElementById('caja-inputs-guest-clasico').classList.remove('oculto');
@@ -584,7 +585,6 @@
                 }
             }
             else if (d.tipo === 'READY_FRENZY' && miRol === 1) {
-                // Solo para Frenetico (Por ahora simula 1v1)
                 invitadosListos++;
                 actualizarBotonHost();
             }
@@ -598,7 +598,7 @@
             }
             else if (d.tipo === 'GUEST_READY' && miRol === 1) {
                 invitadosListos++;
-                iniciarProgreso(d.palabras); // Guardamos las palabras del guest
+                iniciarProgreso(d.palabras); 
                 actualizarBotonHost();
             }
             else if (d.tipo === 'START_GAME' && miRol === 2) { 
@@ -606,6 +606,37 @@
                 iniciarProgreso(d.palabrasHost); 
                 iniciarTablero(); 
             }
+            // --- NUEVOS RECEPTORES MODO JEFE ---
+            else if (d.tipo === 'START_JEFE' && miRol === 2) {
+                iniciarProgreso(d.palabrasHost);
+                enJuegoActivo = true;
+                document.querySelectorAll('.tarjeta, #pantalla-inicio').forEach(e=>e.classList.add('oculto')); 
+                document.getElementById('pantalla-juego').classList.remove('oculto');
+                
+                document.getElementById('titulo-turno').innerText = "¡CARRERA CONTRA EL JEFE!";
+                document.getElementById('subtitulo-turno').innerText = "Adivina todas las palabras antes que el resto del escuadrón.";
+                document.getElementById('caja-marcador').className = "marcador carrera";
+                
+                // En este modo, el invitado no tiene palabras propias que defender
+                document.getElementById('zona-mis-secretos').classList.add('oculto');
+                
+                if(tiempoMax>0) { document.getElementById('reloj-visual').classList.remove('oculto'); startTimer(); }
+                
+                dibujarTablero();
+                updateUI();
+            }
+            else if (d.tipo === 'ACCION_JEFE' && miRol === 1) {
+                agregarLog(`<b>${d.nombre}</b> probó <b>${d.val}</b> en PAL ${d.idx+1} ➔ <span style="font-size:16px;">${d.acierto ? "✅" : "❌"}</span>`);
+                if (d.fin === 'C') {
+                    // ¡Este jugador ganó la carrera! Notificamos a todos
+                    conexionesHost.forEach(c => c.send({tipo: 'FIN_JEFE', ganador: d.nombre}));
+                    terminarJuegoJefe(d.nombre);
+                }
+            }
+            else if (d.tipo === 'FIN_JEFE' && miRol === 2) {
+                terminarJuegoJefe(d.ganador);
+            }
+            // -----------------------------------
             else if (d.tipo === 'ACCION'){ procesarRival(d); }
             else if (d.tipo === 'REMATCH_REQ'){ prepararRevancha(); }
         });
@@ -721,7 +752,15 @@
             document.getElementById('timer-txt').innerText = `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
             if(s===10){ document.getElementById('reloj-visual').classList.add('reloj-urgente'); vibrate('aviso_10s'); }
             if(s<=3 && s>0) vibrate('aviso_3s');
-            if(s<=0){ clearInterval(timerInterval); vibrate('tiempo_agotado'); agregarLog("⏱️ ¡TIEMPO AGOTADO!"); decideWinner(); }
+            if(s<=0){ 
+                clearInterval(timerInterval); vibrate('tiempo_agotado'); agregarLog("⏱️ ¡TIEMPO AGOTADO!"); 
+                if(modoJuego === 'jefe') {
+                    // Si el tiempo se acaba en modo Jefe, gana el Jefe (Host)
+                    terminarJuegoJefe(miRol === 1 ? miNombre : "El Jefe"); 
+                } else {
+                    decideWinner(); 
+                }
+            }
         }, 1000);
     }
 
@@ -764,24 +803,42 @@
         });
         document.getElementById('zona-palabras').innerHTML = h;
 
-        h=''; estadoMisPalabras.forEach((p,i)=>{
-            let d = p.secreto.split('').map(c=>(p.adivinadas.includes(c)||p.resuelta||p.fracasada)?c:'_').join(' ');
-            h += `<div class="item-secreto"><span class="original">Pusiste: <b>${p.secreto}</b></span>Rival: ${d} ${p.resuelta?'✅':(p.fracasada?'❌':'⏳')}</div>`;
-        });
-        if(estadoMisPalabras.length === 0) h = "<p style='text-align:center; font-size:12px; font-weight:700;'>No lograste escribir ninguna 💀</p>";
-        document.getElementById('lista-mis-secretos').innerHTML = h;
+        if(modoJuego !== 'jefe') {
+            h=''; estadoMisPalabras.forEach((p,i)=>{
+                let d = p.secreto.split('').map(c=>(p.adivinadas.includes(c)||p.resuelta||p.fracasada)?c:'_').join(' ');
+                h += `<div class="item-secreto"><span class="original">Pusiste: <b>${p.secreto}</b></span>Rival: ${d} ${p.resuelta?'✅':(p.fracasada?'❌':'⏳')}</div>`;
+            });
+            if(estadoMisPalabras.length === 0) h = "<p style='text-align:center; font-size:12px; font-weight:700;'>No lograste escribir ninguna 💀</p>";
+            document.getElementById('lista-mis-secretos').innerHTML = h;
+        }
     }
 
     function updateUI() {
         if(turnoActual===0) return;
-        let mio = (modoJuego==='clasico' && numPalabras===1) ? (turnoActual===miRol) : true;
+        
+        let mio = false;
+        if(modoJuego === 'clasico') {
+            mio = (numPalabras === 1) ? (turnoActual === miRol) : true;
+        } else if (modoJuego === 'jefe') {
+            mio = (miRol === 2); // En modo jefe, todos los invitados adivinan siempre. El host nunca adivina.
+        } else if (modoJuego === 'frenetico') {
+            mio = true;
+        }
+
         progresoRival.forEach((p,i)=>{
             let l=document.getElementById(`in-l-${i}`), pcomp=document.getElementById(`in-p-${i}`), btns=document.querySelectorAll(`#card-${i} button`);
             if(l){ l.disabled=!mio; pcomp.disabled=!mio; btns.forEach(b=>b.disabled=!mio); }
         });
+
         const m = document.getElementById('caja-marcador');
-        if(modoJuego==='frenetico' || numPalabras>1){ m.className="marcador carrera"; document.getElementById('titulo-turno').innerText="MODO DUELO"; document.getElementById('subtitulo-turno').innerText="¡Sé más rápido y preciso!"; }
-        else { m.className="marcador"; if(mio){ document.getElementById('titulo-turno').innerText="¡TU TURNO!"; m.style.background="linear-gradient(135deg, var(--blue-light), var(--blue-dark))"; } else { document.getElementById('titulo-turno').innerText="TURNO RIVAL"; m.style.background="linear-gradient(135deg, var(--pink-light), var(--pink-dark))"; } }
+        if (modoJuego === 'jefe') {
+             // UI gestionada en iniciarPartidaJefe y START_JEFE
+        }
+        else if(modoJuego==='frenetico' || numPalabras>1){ 
+            m.className="marcador carrera"; document.getElementById('titulo-turno').innerText="MODO DUELO"; document.getElementById('subtitulo-turno').innerText="¡Sé más rápido y preciso!"; 
+        } else { 
+            m.className="marcador"; if(mio){ document.getElementById('titulo-turno').innerText="¡TU TURNO!"; m.style.background="linear-gradient(135deg, var(--blue-light), var(--blue-dark))"; } else { document.getElementById('titulo-turno').innerText="TURNO RIVAL"; m.style.background="linear-gradient(135deg, var(--pink-light), var(--pink-dark))"; } 
+        }
     }
 
     function intentarLetra(idx) { let o=progresoRival[idx], i=document.getElementById(`in-l-${idx}`), v=i.value.trim().toUpperCase(); i.value=""; if(!v||o.adivinadas.includes(v))return; let a=o.secreto.includes(v); if(a){ playSound('acierto'); o.adivinadas.push(v); if(o.secreto.split('').every(c=>o.adivinadas.includes(c))) o.resuelta=true; } else { playSound('error'); vibrate('error'); o.errL++; triggerAnim(idx); } sendAction('L', idx, v, a, o); }
@@ -795,11 +852,24 @@
         agregarLog(`Probaste <b>${val}</b> en PAL ${idx+1} ➔ <span style="font-size:16px;">${acierto ? "✅" : "❌"}</span>`);
 
         let f='NADA'; const s = calcStats(progresoRival);
-        if(modoJuego==='clasico' && numPalabras===1){ if(obj.resuelta) f='W'; else if(obj.fracasada) f='L'; else turnoActual=(turnoActual===1?2:1); }
-        else { if(s.t === progresoRival.length) f='C'; } 
-        conn.send({tipo:'ACCION', idx, val, acierto, fin:f, s});
         
-        if(f!=='NADA') checkDueloTerminado(s); else { dibujarTablero(); updateUI(); }
+        if(modoJuego === 'clasico') {
+            if(numPalabras===1){ if(obj.resuelta) f='W'; else if(obj.fracasada) f='L'; else turnoActual=(turnoActual===1?2:1); }
+            else { if(s.t === progresoRival.length) f='C'; } 
+            conn.send({tipo:'ACCION', idx, val, acierto, fin:f, s});
+            if(f!=='NADA') checkDueloTerminado(s); else { dibujarTablero(); updateUI(); }
+        } else if (modoJuego === 'jefe') {
+            if(s.t === progresoRival.length) f='C'; 
+            conn.send({tipo:'ACCION_JEFE', nombre: miNombre, idx: idx, val: val, acierto: acierto, fin: f});
+            
+            if(f === 'C') {
+                // El jugador terminó todas las palabras. Bloqueamos su UI localmente y esperamos resolución del Host
+                turnoActual = 0;
+                dibujarTablero();
+            } else {
+                dibujarTablero(); updateUI();
+            }
+        }
     }
 
     function procesarRival(d) {
@@ -838,6 +908,7 @@
 
     function calcStats(p) { return { g:p.filter(x=>x.resuelta).length, t:p.filter(x=>x.resuelta||x.fracasada).length, errL:p.reduce((a,b)=>a+b.errL,0), errP:p.reduce((a,b)=>a+b.errP,0) }; }
 
+    // VICTORIA MODO NORMAL
     function decideWinner() {
         if(turnoActual===0) return; 
         clearInterval(timerInterval); const m=calcStats(progresoRival), r=calcStats(estadoMisPalabras);
@@ -857,8 +928,80 @@
         document.getElementById('subtitulo-turno').innerText=msj; dibujarTablero();
     }
 
-    function solicitarRevancha() { conn.send({tipo:'REMATCH_REQ'}); prepararRevancha(); }
-    function prepararRevancha() { clearInterval(timerInterval); enJuegoActivo=false; document.querySelectorAll('.tarjeta, #pantalla-juego').forEach(e=>e.classList.add('oculto')); estadoFrenzyLocal=null; estadoFrenzyRival=null; miTableroListo=false; rivalTableroListo=false; document.getElementById('zona-mis-secretos').classList.remove('oculto'); document.querySelector('.caja-historial-container').classList.remove('oculto'); if(miRol===1){ document.getElementById('pantalla-host').classList.remove('oculto'); document.getElementById('host-paso1').classList.remove('oculto'); document.getElementById('host-paso2').classList.add('oculto'); } else { document.getElementById('pantalla-guest').classList.remove('oculto'); document.getElementById('guest-paso1').classList.remove('oculto'); document.getElementById('guest-paso2').classList.add('oculto'); document.getElementById('guest-codigo').value=""; } }
+    // VICTORIA MODO JEFE
+    function terminarJuegoJefe(ganador) {
+        clearInterval(timerInterval);
+        enJuegoActivo=false; turnoActual=0; 
+        
+        // Host (Jefe) es el único que puede pedir revancha, los invitados esperan
+        if(miRol === 1) document.getElementById('zona-revancha').classList.remove('oculto');
+        
+        const tit = document.getElementById('titulo-turno'); 
+        const marc = document.getElementById('caja-marcador');
+        
+        if(miRol === 1) {
+            // Vista del Jefe
+            if(ganador === miNombre) {
+                // El jefe ganó porque se acabó el tiempo
+                tit.innerText = "¡VICTORIA! TUS DEFENSAS RESISTIERON 🎉";
+                playSound('win'); confetti({particleCount:300, spread:150});
+                marc.className = "marcador";
+                document.getElementById('subtitulo-turno').innerText = "El escuadrón no pudo con tus palabras.";
+            } else {
+                tit.innerText = `¡${ganador.toUpperCase()} DESCIFRÓ EL CÓDIGO!`;
+                playSound('lose'); vibrate('lose');
+                marc.className = "marcador muerte";
+                document.getElementById('subtitulo-turno').innerText = "Tu escuadrón te ha vencido.";
+            }
+        } else {
+            // Vista de los Invitados (Escuadrón)
+            if(ganador === miNombre) {
+                tit.innerText = "¡VICTORIA! ERES EL MEJOR DEL ESCUADRÓN 🎉";
+                playSound('win'); confetti({particleCount:300, spread:150});
+                marc.className = "marcador";
+            } else if (ganador === "El Jefe") {
+                tit.innerText = `¡EL JEFE HA GANADO! 💀`;
+                playSound('lose'); vibrate('lose');
+                marc.className = "marcador muerte";
+            } else {
+                tit.innerText = `¡${ganador.toUpperCase()} GANÓ LA CARRERA! 💀`;
+                playSound('lose'); vibrate('lose');
+                marc.className = "marcador muerte";
+            }
+            document.getElementById('subtitulo-turno').innerText = "El juego ha terminado.";
+            dibujarTablero();
+        }
+    }
+
+    function solicitarRevancha() { 
+        if(modoJuego === 'jefe') {
+            conexionesHost.forEach(c => c.send({tipo:'REMATCH_REQ'}));
+        } else {
+            conn.send({tipo:'REMATCH_REQ'}); 
+        }
+        prepararRevancha(); 
+    }
+
+    function prepararRevancha() { 
+        clearInterval(timerInterval); enJuegoActivo=false; 
+        document.querySelectorAll('.tarjeta, #pantalla-juego').forEach(e=>e.classList.add('oculto')); 
+        estadoFrenzyLocal=null; estadoFrenzyRival=null; miTableroListo=false; rivalTableroListo=false; 
+        document.getElementById('zona-mis-secretos').classList.remove('oculto'); 
+        document.querySelector('.caja-historial-container').classList.remove('oculto'); 
+        document.getElementById('historial').innerHTML = ''; // Limpiar log anterior
+        
+        if(miRol===1){ 
+            document.getElementById('pantalla-host').classList.remove('oculto'); 
+            document.getElementById('host-paso1').classList.remove('oculto'); 
+            document.getElementById('host-paso2').classList.add('oculto'); 
+            hostGuardoPalabras = false; invitadosListos = 0; // Resetear flags multi
+        } else { 
+            document.getElementById('pantalla-guest').classList.remove('oculto'); 
+            document.getElementById('guest-paso1').classList.remove('oculto'); 
+            document.getElementById('guest-paso2').classList.add('oculto'); 
+            document.getElementById('guest-codigo').value=""; 
+        } 
+    }
     
     // NAVEGACION HISTORIAL BLINDADA
     try { history.replaceState({p:'inicio'}, "", ""); } catch(e){}
