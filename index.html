@@ -284,6 +284,7 @@
     let conexionesHost = []; 
     let invitadosListos = 0; 
     let hostGuardoPalabras = false;
+    let palabrasGlobales = {}; // NUEVO: Diccionario maestro para Batalla Real
 
     const MAX_ERR_LETRA = 10, MAX_ERR_PALABRA = 3;
 
@@ -353,6 +354,7 @@
         estadoFrenzyLocal=null; estadoFrenzyRival=null; 
         miTableroListo=false; rivalTableroListo=false;
         conexionesHost = []; invitadosListos = 0; hostGuardoPalabras = false; misPalabras = [];
+        palabrasGlobales = {}; // Resetear diccionario
         
         if(frenzyTimer) clearInterval(frenzyTimer);
         if(timerInterval) clearInterval(timerInterval);
@@ -366,7 +368,7 @@
         if (numPersonas === 2) {
             opcionesHTML = `<option value="clasico">🛡️ Clásico (Estratégico)</option><option value="frenetico">🔥 Frenético (Muerte Súbita)</option>`;
         } else {
-            opcionesHTML = `<option value="jefe">👑 Jefe vs Escuadrón</option><option value="batalla">⚔️ Batalla Real (Próximamente)</option><option value="cadena">🔗 Ataque en Cadena (Próximamente)</option>`;
+            opcionesHTML = `<option value="jefe">👑 Jefe vs Escuadrón</option><option value="batalla">⚔️ Batalla Real</option><option value="cadena">🔗 Ataque en Cadena (Próximamente)</option>`;
         }
         
         selectModo.innerHTML = opcionesHTML;
@@ -390,8 +392,12 @@
             desc.innerText = "Tú (Jefe) escribes las palabras. El escuadrón compite por descifrarlas primero.";
             desc.style.color = "var(--blue-dark)";
             desc.classList.remove('oculto');
-        } else if (modoJuego === 'batalla' || modoJuego === 'cadena') {
-            desc.innerText = "Estamos construyendo este modo masivo. ¡Juega Modo Jefe mientras tanto!";
+        } else if (modoJuego === 'batalla') {
+            desc.innerText = "Todos escriben. Te enfrentarás a las palabras de todos los demás a la vez.";
+            desc.style.color = "var(--blue-dark)";
+            desc.classList.remove('oculto');
+        } else if (modoJuego === 'cadena') {
+            desc.innerText = "Estamos construyendo este modo masivo. ¡Prueba la Batalla Real!";
             desc.style.color = "var(--text-muted)";
             desc.classList.remove('oculto');
         }
@@ -401,8 +407,8 @@
         maxJugadores = parseInt(document.getElementById('host-num-personas').value);
         modoJuego = document.getElementById('host-modo').value;
         
-        if(modoJuego === 'batalla' || modoJuego === 'cadena') {
-            alert("Este modo estará disponible en la próxima actualización. Por favor, elige Modo Jefe.");
+        if(modoJuego === 'cadena') {
+            alert("Este modo estará disponible en la próxima actualización. Por favor, elige otro modo.");
             return;
         }
 
@@ -472,6 +478,15 @@
             } else {
                 btn.innerText = `Esperando a ${invitadosNecesarios - conexionesHost.length} jugador(es)...`;
             }
+        } else if (modoJuego === 'batalla') {
+            if (invitadosListos >= invitadosNecesarios) {
+                btn.innerText = "¡TODOS LISTOS! INICIAR BATALLA";
+                btn.disabled = false;
+                btn.onclick = iniciarPartidaBatalla;
+            } else {
+                btn.innerText = `Esperando palabras de ${invitadosNecesarios - invitadosListos} jugador(es)...`;
+                btn.disabled = true;
+            }
         } else {
             if (invitadosListos >= invitadosNecesarios) {
                 btn.innerText = "¡TODOS LISTOS! INICIAR PARTIDA";
@@ -487,6 +502,8 @@
     function hostGuardarPalabras() { 
         let p = leerInputsData('host-inputs-palabras', numPalabras, 'error-host'); if(!p) return; 
         misPalabras = p; 
+        palabrasGlobales[miNombre] = misPalabras; // Guarda en el diccionario maestro
+
         hostGuardoPalabras = true;
         document.getElementById('error-host').innerText = "";
         
@@ -498,7 +515,6 @@
     }
 
     function iniciarPartidaJefe() {
-        // Envia el banderazo de salida a todos los invitados
         conexionesHost.forEach(c => c.send({tipo: 'START_JEFE', palabrasHost: misPalabras}));
         
         enJuegoActivo = true;
@@ -510,7 +526,7 @@
         document.getElementById('caja-marcador').className = "marcador";
         document.getElementById('titulo-historial').innerText = "🚨 Actividad del Escuadrón";
         
-        document.getElementById('zona-palabras').innerHTML = ""; // El Host no adivina en este modo
+        document.getElementById('zona-palabras').innerHTML = ""; 
         
         let h=''; misPalabras.forEach((p)=>{
             h += `<div class="item-secreto"><span class="original">Defendiendo: <b>${p.palabra}</b></span> <span style="font-size:12px; color:var(--text-muted);">(💡 ${p.pista || 'Sin pista'})</span></div>`;
@@ -519,6 +535,14 @@
         
         if(tiempoMax>0) { document.getElementById('reloj-visual').classList.remove('oculto'); startTimer(); }
     }
+
+    // --- NUEVO: DISPARO INICIAL BATALLA REAL ---
+    function iniciarPartidaBatalla() {
+        let payload = { tipo: 'START_BATALLA', diccionario: palabrasGlobales };
+        conexionesHost.forEach(c => c.send(payload));
+        prepararTableroBatalla(palabrasGlobales);
+    }
+    // ------------------------------------------
 
     function iniciarPartidaNormal() { 
         if(maxJugadores === 2) {
@@ -598,7 +622,12 @@
             }
             else if (d.tipo === 'GUEST_READY' && miRol === 1) {
                 invitadosListos++;
-                iniciarProgreso(d.palabras); 
+                palabrasGlobales[d.nombre] = d.palabras; // Guarda en diccionario maestro
+                
+                // Mantenemos la lógica intacta del clásico 1vs1
+                if (modoJuego === 'clasico') {
+                    iniciarProgreso(d.palabras);
+                }
                 actualizarBotonHost();
             }
             else if (d.tipo === 'START_GAME' && miRol === 2) { 
@@ -606,7 +635,6 @@
                 iniciarProgreso(d.palabrasHost); 
                 iniciarTablero(); 
             }
-            // --- NUEVOS RECEPTORES MODO JEFE ---
             else if (d.tipo === 'START_JEFE' && miRol === 2) {
                 iniciarProgreso(d.palabrasHost);
                 enJuegoActivo = true;
@@ -616,19 +644,30 @@
                 document.getElementById('titulo-turno').innerText = "¡CARRERA CONTRA EL JEFE!";
                 document.getElementById('subtitulo-turno').innerText = "Adivina todas las palabras antes que el resto del escuadrón.";
                 document.getElementById('caja-marcador').className = "marcador carrera";
-                
-                // En este modo, el invitado no tiene palabras propias que defender
                 document.getElementById('zona-mis-secretos').classList.add('oculto');
                 
                 if(tiempoMax>0) { document.getElementById('reloj-visual').classList.remove('oculto'); startTimer(); }
                 
-                dibujarTablero();
-                updateUI();
+                dibujarTablero(); updateUI();
             }
+            // --- NUEVOS RECEPTORES BATALLA REAL ---
+            else if (d.tipo === 'START_BATALLA' && miRol === 2) {
+                prepararTableroBatalla(d.diccionario);
+            }
+            else if (d.tipo === 'ACCION_BATALLA' && miRol === 1) {
+                // El Host recibe avisos de victoria de la Batalla Real
+                if (d.fin === 'C') {
+                    conexionesHost.forEach(c => c.send({tipo: 'FIN_BATALLA', ganador: d.nombre}));
+                    terminarJuegoBatalla(d.nombre);
+                }
+            }
+            else if (d.tipo === 'FIN_BATALLA' && miRol === 2) {
+                terminarJuegoBatalla(d.ganador);
+            }
+            // --------------------------------------
             else if (d.tipo === 'ACCION_JEFE' && miRol === 1) {
                 agregarLog(`<b>${d.nombre}</b> probó <b>${d.val}</b> en PAL ${d.idx+1} ➔ <span style="font-size:16px;">${d.acierto ? "✅" : "❌"}</span>`);
                 if (d.fin === 'C') {
-                    // ¡Este jugador ganó la carrera! Notificamos a todos
                     conexionesHost.forEach(c => c.send({tipo: 'FIN_JEFE', ganador: d.nombre}));
                     terminarJuegoJefe(d.nombre);
                 }
@@ -636,11 +675,48 @@
             else if (d.tipo === 'FIN_JEFE' && miRol === 2) {
                 terminarJuegoJefe(d.ganador);
             }
-            // -----------------------------------
             else if (d.tipo === 'ACCION'){ procesarRival(d); }
             else if (d.tipo === 'REMATCH_REQ'){ prepararRevancha(); }
         });
     }
+
+    // --- NUEVA LÓGICA DE TABLERO: BATALLA REAL ---
+    function prepararTableroBatalla(diccionario) {
+        palabrasGlobales = diccionario; // Guarda localmente
+        let misPalabrasAdivinar = [];
+        
+        for (let jugador in diccionario) {
+            if (jugador !== miNombre) {
+                let palabrasDeJugador = diccionario[jugador];
+                palabrasDeJugador.forEach(p => {
+                    misPalabrasAdivinar.push({
+                        secreto: p.palabra,
+                        pista: `(De ${jugador}) ` + (p.pista || 'Sin pista'),
+                        adivinadas: [p.palabra[0], p.palabra[p.palabra.length-1]],
+                        errL: 0, errP: 0, resuelta: false, fracasada: false
+                    });
+                });
+            }
+        }
+        
+        // Mezclamos todas las palabras de los rivales para que sea aleatorio
+        misPalabrasAdivinar.sort(() => Math.random() - 0.5);
+        progresoRival = misPalabrasAdivinar;
+        
+        enJuegoActivo = true;
+        document.querySelectorAll('.tarjeta, #pantalla-inicio').forEach(e=>e.classList.add('oculto')); 
+        document.getElementById('pantalla-juego').classList.remove('oculto');
+        
+        document.getElementById('titulo-turno').innerText = "¡BATALLA REAL!";
+        document.getElementById('subtitulo-turno').innerText = "Adivina los códigos de todos tus rivales combinados.";
+        document.getElementById('caja-marcador').className = "marcador carrera";
+        
+        if(tiempoMax>0) { document.getElementById('reloj-visual').classList.remove('oculto'); startTimer(); }
+        
+        dibujarTablero();
+        updateUI(); 
+    }
+    // ---------------------------------------------
 
     function startFrenzyCountdown() {
         try { history.pushState({p:'frenesi'}, "", "#frenesi"); } catch(e){}
@@ -755,8 +831,9 @@
             if(s<=0){ 
                 clearInterval(timerInterval); vibrate('tiempo_agotado'); agregarLog("⏱️ ¡TIEMPO AGOTADO!"); 
                 if(modoJuego === 'jefe') {
-                    // Si el tiempo se acaba en modo Jefe, gana el Jefe (Host)
                     terminarJuegoJefe(miRol === 1 ? miNombre : "El Jefe"); 
+                } else if (modoJuego === 'batalla') {
+                    terminarJuegoBatalla("EL TIEMPO SE AGOTÓ"); 
                 } else {
                     decideWinner(); 
                 }
@@ -803,13 +880,23 @@
         });
         document.getElementById('zona-palabras').innerHTML = h;
 
-        if(modoJuego !== 'jefe') {
+        if (modoJuego === 'clasico' || modoJuego === 'frenetico') {
             h=''; estadoMisPalabras.forEach((p,i)=>{
                 let d = p.secreto.split('').map(c=>(p.adivinadas.includes(c)||p.resuelta||p.fracasada)?c:'_').join(' ');
                 h += `<div class="item-secreto"><span class="original">Pusiste: <b>${p.secreto}</b></span>Rival: ${d} ${p.resuelta?'✅':(p.fracasada?'❌':'⏳')}</div>`;
             });
             if(estadoMisPalabras.length === 0) h = "<p style='text-align:center; font-size:12px; font-weight:700;'>No lograste escribir ninguna 💀</p>";
             document.getElementById('lista-mis-secretos').innerHTML = h;
+            document.getElementById('zona-mis-secretos').classList.remove('oculto');
+        } else if (modoJuego === 'batalla') {
+            h=''; 
+            if (palabrasGlobales[miNombre]) {
+                palabrasGlobales[miNombre].forEach((p)=>{
+                    h += `<div class="item-secreto"><span class="original">Defendiendo: <b>${p.palabra}</b></span> <span style="font-size:12px; color:var(--text-muted);">(💡 ${p.pista || 'Sin pista'})</span></div>`;
+                });
+            }
+            document.getElementById('lista-mis-secretos').innerHTML = h;
+            document.getElementById('zona-mis-secretos').classList.remove('oculto');
         }
     }
 
@@ -820,8 +907,8 @@
         if(modoJuego === 'clasico') {
             mio = (numPalabras === 1) ? (turnoActual === miRol) : true;
         } else if (modoJuego === 'jefe') {
-            mio = (miRol === 2); // En modo jefe, todos los invitados adivinan siempre. El host nunca adivina.
-        } else if (modoJuego === 'frenetico') {
+            mio = (miRol === 2); 
+        } else if (modoJuego === 'frenetico' || modoJuego === 'batalla') {
             mio = true;
         }
 
@@ -832,9 +919,9 @@
 
         const m = document.getElementById('caja-marcador');
         if (modoJuego === 'jefe') {
-             // UI gestionada en iniciarPartidaJefe y START_JEFE
+             // UI gestionada externamente
         }
-        else if(modoJuego==='frenetico' || numPalabras>1){ 
+        else if(modoJuego==='frenetico' || modoJuego==='batalla' || numPalabras>1){ 
             m.className="marcador carrera"; document.getElementById('titulo-turno').innerText="MODO DUELO"; document.getElementById('subtitulo-turno').innerText="¡Sé más rápido y preciso!"; 
         } else { 
             m.className="marcador"; if(mio){ document.getElementById('titulo-turno').innerText="¡TU TURNO!"; m.style.background="linear-gradient(135deg, var(--blue-light), var(--blue-dark))"; } else { document.getElementById('titulo-turno').innerText="TURNO RIVAL"; m.style.background="linear-gradient(135deg, var(--pink-light), var(--pink-dark))"; } 
@@ -853,23 +940,45 @@
 
         let f='NADA'; const s = calcStats(progresoRival);
         
-        if(modoJuego === 'clasico') {
-            if(numPalabras===1){ if(obj.resuelta) f='W'; else if(obj.fracasada) f='L'; else turnoActual=(turnoActual===1?2:1); }
-            else { if(s.t === progresoRival.length) f='C'; } 
-            conn.send({tipo:'ACCION', idx, val, acierto, fin:f, s});
-            if(f!=='NADA') checkDueloTerminado(s); else { dibujarTablero(); updateUI(); }
-        } else if (modoJuego === 'jefe') {
+        // ESCUDO: BATALLA REAL
+        if (modoJuego === 'batalla') {
+            if(s.t === progresoRival.length) f='C'; 
+            if(miRol === 1) {
+                if(f === 'C') {
+                    conexionesHost.forEach(c => c.send({tipo: 'FIN_BATALLA', ganador: miNombre}));
+                    terminarJuegoBatalla(miNombre);
+                } else {
+                    dibujarTablero(); updateUI();
+                }
+            } else {
+                conn.send({tipo:'ACCION_BATALLA', nombre: miNombre, fin: f});
+                if (f === 'C') {
+                    turnoActual = 0; dibujarTablero();
+                } else {
+                    dibujarTablero(); updateUI();
+                }
+            }
+            return; // Bloquea la lógica clásica
+        }
+        
+        // ESCUDO: MODO JEFE
+        if (modoJuego === 'jefe') {
             if(s.t === progresoRival.length) f='C'; 
             conn.send({tipo:'ACCION_JEFE', nombre: miNombre, idx: idx, val: val, acierto: acierto, fin: f});
-            
             if(f === 'C') {
-                // El jugador terminó todas las palabras. Bloqueamos su UI localmente y esperamos resolución del Host
-                turnoActual = 0;
-                dibujarTablero();
+                turnoActual = 0; dibujarTablero();
             } else {
                 dibujarTablero(); updateUI();
             }
+            return; // Bloquea la lógica clásica
         }
+
+        // LÓGICA CLÁSICA ORIGINAL
+        if(modoJuego==='clasico' && numPalabras===1){ if(obj.resuelta) f='W'; else if(obj.fracasada) f='L'; else turnoActual=(turnoActual===1?2:1); }
+        else { if(s.t === progresoRival.length) f='C'; } 
+        conn.send({tipo:'ACCION', idx, val, acierto, fin:f, s});
+        
+        if(f!=='NADA') checkDueloTerminado(s); else { dibujarTablero(); updateUI(); }
     }
 
     function procesarRival(d) {
@@ -908,7 +1017,7 @@
 
     function calcStats(p) { return { g:p.filter(x=>x.resuelta).length, t:p.filter(x=>x.resuelta||x.fracasada).length, errL:p.reduce((a,b)=>a+b.errL,0), errP:p.reduce((a,b)=>a+b.errP,0) }; }
 
-    // VICTORIA MODO NORMAL
+    // VICTORIA CLASICA
     function decideWinner() {
         if(turnoActual===0) return; 
         clearInterval(timerInterval); const m=calcStats(progresoRival), r=calcStats(estadoMisPalabras);
@@ -928,21 +1037,48 @@
         document.getElementById('subtitulo-turno').innerText=msj; dibujarTablero();
     }
 
+    // --- NUEVO: VICTORIA BATALLA REAL ---
+    function terminarJuegoBatalla(ganador) {
+        clearInterval(timerInterval);
+        enJuegoActivo=false; turnoActual=0; 
+        
+        if(miRol === 1) document.getElementById('zona-revancha').classList.remove('oculto');
+        
+        const tit = document.getElementById('titulo-turno'); 
+        const marc = document.getElementById('caja-marcador');
+        
+        if(ganador === miNombre) {
+            tit.innerText = "¡VICTORIA ROYALE! 👑";
+            playSound('win'); confetti({particleCount:300, spread:150});
+            marc.className = "marcador";
+            document.getElementById('subtitulo-turno').innerText = "Fuiste el más rápido del campo de batalla.";
+        } else if (ganador === "EL TIEMPO SE AGOTÓ") {
+            tit.innerText = `¡TIEMPO AGOTADO! ⏳`;
+            playSound('lose'); vibrate('tiempo_agotado');
+            marc.className = "marcador muerte";
+            document.getElementById('subtitulo-turno').innerText = "Nadie logró sobrevivir a la batalla.";
+        } else {
+            tit.innerText = `¡${ganador.toUpperCase()} GANÓ LA BATALLA! 💀`;
+            playSound('lose'); vibrate('lose');
+            marc.className = "marcador muerte";
+            document.getElementById('subtitulo-turno').innerText = "Suerte para la próxima vez.";
+        }
+        dibujarTablero();
+    }
+    // ------------------------------------
+
     // VICTORIA MODO JEFE
     function terminarJuegoJefe(ganador) {
         clearInterval(timerInterval);
         enJuegoActivo=false; turnoActual=0; 
         
-        // Host (Jefe) es el único que puede pedir revancha, los invitados esperan
         if(miRol === 1) document.getElementById('zona-revancha').classList.remove('oculto');
         
         const tit = document.getElementById('titulo-turno'); 
         const marc = document.getElementById('caja-marcador');
         
         if(miRol === 1) {
-            // Vista del Jefe
             if(ganador === miNombre) {
-                // El jefe ganó porque se acabó el tiempo
                 tit.innerText = "¡VICTORIA! TUS DEFENSAS RESISTIERON 🎉";
                 playSound('win'); confetti({particleCount:300, spread:150});
                 marc.className = "marcador";
@@ -954,7 +1090,6 @@
                 document.getElementById('subtitulo-turno').innerText = "Tu escuadrón te ha vencido.";
             }
         } else {
-            // Vista de los Invitados (Escuadrón)
             if(ganador === miNombre) {
                 tit.innerText = "¡VICTORIA! ERES EL MEJOR DEL ESCUADRÓN 🎉";
                 playSound('win'); confetti({particleCount:300, spread:150});
@@ -974,7 +1109,7 @@
     }
 
     function solicitarRevancha() { 
-        if(modoJuego === 'jefe') {
+        if(modoJuego === 'jefe' || modoJuego === 'batalla') {
             conexionesHost.forEach(c => c.send({tipo:'REMATCH_REQ'}));
         } else {
             conn.send({tipo:'REMATCH_REQ'}); 
@@ -988,13 +1123,13 @@
         estadoFrenzyLocal=null; estadoFrenzyRival=null; miTableroListo=false; rivalTableroListo=false; 
         document.getElementById('zona-mis-secretos').classList.remove('oculto'); 
         document.querySelector('.caja-historial-container').classList.remove('oculto'); 
-        document.getElementById('historial').innerHTML = ''; // Limpiar log anterior
+        document.getElementById('historial').innerHTML = ''; 
         
         if(miRol===1){ 
             document.getElementById('pantalla-host').classList.remove('oculto'); 
             document.getElementById('host-paso1').classList.remove('oculto'); 
             document.getElementById('host-paso2').classList.add('oculto'); 
-            hostGuardoPalabras = false; invitadosListos = 0; // Resetear flags multi
+            hostGuardoPalabras = false; invitadosListos = 0; palabrasGlobales = {};
         } else { 
             document.getElementById('pantalla-guest').classList.remove('oculto'); 
             document.getElementById('guest-paso1').classList.remove('oculto'); 
