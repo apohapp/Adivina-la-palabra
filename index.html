@@ -25,9 +25,7 @@
         }
 
         /* ESCUDO ANTIRRECARGAS */
-        html, body {
-            overscroll-behavior-y: none;
-        }
+        html, body { overscroll-behavior-y: none; }
 
         body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top, #e0f2fe, var(--bg-body)); color: var(--text-main); text-align: center; margin: 0; padding: 20px 15px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
         .oculto { display: none !important; }
@@ -207,7 +205,7 @@
                 <div id="host-inputs-palabras" style="width: 100%; margin-bottom: 15px;"></div>
             </div>
             <p id="error-host" class="alerta"></p>
-            <button id="btn-esperar" onclick="hostGuardarPalabras()" class="btn-blue" style="width: 100%; padding: 16px;" disabled>Esperando Rival...</button>
+            <button id="btn-esperar" onclick="hostGuardarPalabras()" class="btn-blue" style="width: 100%; padding: 16px;" disabled>Iniciando servidor...</button>
         </div>
     </div>
 
@@ -220,19 +218,27 @@
             <button onclick="guestConectar()" class="btn-yellow" style="width: 100%; padding: 16px;">Conectar Ahora ➔</button>
         </div>
         <div id="guest-paso2" class="oculto fade-in">
-            <div id="guest-info-modo" style="background: var(--blue-light); color: white; padding: 10px; border-radius: 12px; margin-bottom: 20px; font-weight: 700;">
+            <div id="guest-info-modo" class="oculto" style="background: var(--blue-light); color: white; padding: 10px; border-radius: 12px; margin-bottom: 20px; font-weight: 700;">
                 Jugaremos con <span id="guest-mostrar-num" style="font-weight: 900; font-size: 18px;"></span> palabras.
             </div>
-            <div id="caja-inputs-guest-clasico">
+            
+            <div id="caja-inputs-guest-clasico" class="oculto">
                 <label class="label-modern">Tus Palabras Secretas</label>
                 <div id="guest-inputs-palabras" style="width: 100%; margin-bottom: 15px;"></div>
                 <p id="error-guest" class="alerta"></p>
                 <button id="btn-guest-listo" onclick="guestGuardarPalabras()" class="btn-blue" style="width: 100%; padding: 16px;">¡Guardar mis palabras!</button>
             </div>
+            
             <div id="caja-espera-frenesi" class="oculto">
-                <h3 style="color: var(--pink-dark); font-weight: 900;">🔥 MODO FRENÉTICO ACTIVO</h3>
+                <h3 style="color: var(--pink-dark); font-weight: 900;">🔥 MODO FRENÉTICO</h3>
                 <p style="font-weight: 700; font-size: 14px;">Prepárate. Tendrás solo 25 segundos para armar tus defensas en cuanto el Host inicie.</p>
                 <button id="btn-guest-frenzy-listo" onclick="guestReadyFrenzy()" class="btn-pink" style="width: 100%; padding: 16px; margin-top: 15px; animation: latido 1.5s infinite;">¡ESTOY LISTO!</button>
+            </div>
+
+            <div id="caja-espera-jefe" class="oculto" style="background: #f8fafc; padding: 20px; border-radius: 20px; border: 2px dashed var(--blue-light);">
+                <h3 style="color: var(--blue-dark); font-weight: 900; margin-top:0;">👑 MODO JEFE</h3>
+                <p style="font-weight: 700; font-size: 13px; color: var(--text-muted);">Tú eres parte del Escuadrón. Espera a que el Jefe (Host) configure las palabras secretas que todos deberán descifrar.</p>
+                <div style="font-size: 35px; margin-top: 15px; animation: latido 1.5s infinite;">⏳</div>
             </div>
         </div>
     </div>
@@ -283,8 +289,12 @@
     let enJuegoActivo = false, tiempoMax = 0, timerInterval = null;
     let modoJuego = 'clasico'; 
     let frenzyTimer = null, estadoFrenzyLocal = null, estadoFrenzyRival = null;
+    
+    // --- VARIABLES MULTIJUGADOR ---
     let maxJugadores = 2;
-    let palabrasRivalTemporal = null; // Escudo antibugs para el Host
+    let conexionesHost = []; // El Host guarda aquí todas las conexiones de los invitados
+    let invitadosListos = 0; // Contador para saber si todos enviaron sus palabras
+    let hostGuardoPalabras = false;
 
     const MAX_ERR_LETRA = 10, MAX_ERR_PALABRA = 3;
 
@@ -349,13 +359,12 @@
         document.getElementById('guest-paso1').classList.remove('oculto');
         document.getElementById('guest-paso2').classList.add('oculto');
         document.getElementById('guest-codigo').value = '';
-        document.getElementById('btn-esperar').disabled = true;
-        document.getElementById('btn-esperar').innerText = "Esperando Rival...";
         
         enJuegoActivo = false;
         estadoFrenzyLocal=null; estadoFrenzyRival=null; 
         miTableroListo=false; rivalTableroListo=false;
-        misPalabras = []; palabrasRivalTemporal = null;
+        conexionesHost = []; invitadosListos = 0; hostGuardoPalabras = false; misPalabras = [];
+        
         if(frenzyTimer) clearInterval(frenzyTimer);
         if(timerInterval) clearInterval(timerInterval);
     }
@@ -385,20 +394,19 @@
         desc.style.color = "var(--pink-dark)";
 
         if (modoJuego === 'frenetico') {
-            selectNum.value = "5"; 
-            selectNum.disabled = true; 
+            selectNum.value = "5"; selectNum.disabled = true; 
             desc.innerText = "¡25 segundos para armar defensas! El que no escribe, PIERDE al instante.";
             desc.classList.remove('oculto');
         } else if (modoJuego === 'jefe') {
-            desc.innerText = "Un jugador define las palabras, los demás compiten por adivinarlas primero.";
+            desc.innerText = "Tú (Jefe) escribes el código. El escuadrón compite por descifrarlo primero.";
             desc.style.color = "var(--blue-dark)";
             desc.classList.remove('oculto');
         } else if (modoJuego === 'batalla') {
-            desc.innerText = "Todos escriben. Todas las palabras se mezclan. ¡Sobrevive el que adivine más!";
+            desc.innerText = "Todos escriben. Todas las palabras se mezclan en una piscina central.";
             desc.style.color = "var(--blue-dark)";
             desc.classList.remove('oculto');
         } else if (modoJuego === 'cadena') {
-            desc.innerText = "Cada jugador ataca a la persona de su derecha. ¡No rompas la cadena!";
+            desc.innerText = "Cada jugador ataca a la persona conectada a su derecha.";
             desc.style.color = "var(--blue-dark)";
             desc.classList.remove('oculto');
         }
@@ -415,33 +423,35 @@
         try { history.pushState({p:'espera'}, "", "#espera"); } catch(e){}
         
         let btnEspera = document.getElementById('btn-esperar');
-        if (modoJuego === 'clasico') {
+        
+        // MODO JEFE Y CLÁSICO MUESTRAN INPUTS AL HOST. MODO FRENÉTICO LOS OCULTA.
+        if (modoJuego !== 'frenetico') {
             document.getElementById('caja-inputs-host-clasico').classList.remove('oculto');
             generarInputsHtml('host-inputs-palabras', numPalabras);
-            btnEspera.innerText = "Esperando Conexión...";
+            btnEspera.innerText = "Guarda tus palabras para empezar...";
+            btnEspera.disabled = false;
+            btnEspera.onclick = hostGuardarPalabras;
         } else {
             document.getElementById('caja-inputs-host-clasico').classList.add('oculto');
-            btnEspera.innerText = "Esperando al rival...";
+            btnEspera.innerText = "Esperando conexiones...";
+            btnEspera.disabled = true;
         }
 
         if(!peer) {
             let r = Math.random().toString(36).substring(2,6).toUpperCase();
             peer = new Peer('funword-'+r);
             peer.on('open', id => document.getElementById('mostrar-codigo').innerText = r);
+            
+            // EL HOST ESCUCHA MÚLTIPLES CONEXIONES
             peer.on('connection', c => { 
-                conn = c; 
-                conn.on('open', () => {
-                    configMensajes();
-                    if(modoJuego === 'clasico') {
-                        btnEspera.innerText="¡Rival Conectado! Escribe tus palabras"; btnEspera.disabled=false; 
-                    } else {
-                        btnEspera.innerText="Rival conectado. Esperando su OK..."; btnEspera.disabled=true; 
-                    }
+                conn = c; // Mantenemos compatibilidad con 1v1
+                conexionesHost.push(c);
+                
+                c.on('open', () => {
+                    configMensajes(c); // Pasamos la conexión específica
+                    actualizarBotonHost(); // Verificamos si ya hay suficientes jugadores
                 });
             });
-        } else {
-            btnEspera.innerText="Esperando Conexión...";
-            btnEspera.disabled=true; 
         }
     }
 
@@ -450,42 +460,69 @@
         document.getElementById(id).innerHTML = h; 
     }
 
-    // --- NUEVA LÓGICA DE BOTONES PARA MODO CLÁSICO ---
-    function hostGuardarPalabras() { 
-        if (modoJuego === 'clasico') {
-            let p = leerInputsData('host-inputs-palabras', numPalabras, 'error-host'); if(!p) return; 
-            misPalabras = p; 
+    // --- EL CEREBRO DEL BOTÓN DEL HOST ---
+    function actualizarBotonHost() {
+        if (!hostGuardoPalabras && modoJuego !== 'frenetico') return; 
 
-            if (palabrasRivalTemporal) {
-                prepararBotonInicio();
+        let btn = document.getElementById('btn-esperar');
+        let invitadosNecesarios = maxJugadores - 1;
+
+        if (modoJuego === 'jefe') {
+            // En modo Jefe, solo se necesita que se conecten, no tienen que escribir palabras
+            if (conexionesHost.length >= invitadosNecesarios) {
+                btn.innerText = "¡ESCUADRÓN LISTO! INICIAR PARTIDA";
+                btn.disabled = false;
+                btn.onclick = iniciarPartidaJefe; // Próximamente la función real
             } else {
-                let btn = document.getElementById('btn-esperar');
-                btn.innerText="Esperando palabras del rival..."; 
-                btn.disabled=true; 
-                btn.onclick = null;
+                btn.innerText = `Esperando a ${invitadosNecesarios - conexionesHost.length} jugador(es)...`;
+                btn.disabled = true;
+            }
+        } else if (modoJuego === 'frenetico') {
+            if (conexionesHost.length >= invitadosNecesarios) {
+                btn.innerText = "¡TODOS CONECTADOS! INICIAR FRENESÍ";
+                btn.disabled = false;
+                btn.onclick = () => { conexionesHost.forEach(c => c.send({tipo: 'START_FRENZY'})); startFrenzyCountdown(); };
+            } else {
+                btn.innerText = `Esperando a ${invitadosNecesarios - conexionesHost.length} jugador(es)...`;
+            }
+        } else {
+            // Clásico, Batalla o Cadena: Requieren que todos escriban y guarden (GUEST_READY)
+            if (invitadosListos >= invitadosNecesarios) {
+                btn.innerText = "¡TODOS LISTOS! INICIAR PARTIDA";
+                btn.disabled = false;
+                btn.onclick = iniciarPartidaNormal;
+            } else {
+                btn.innerText = `Esperando palabras de ${invitadosNecesarios - invitadosListos} jugador(es)...`;
+                btn.disabled = true;
             }
         }
     }
 
-    function prepararBotonInicio() {
+    function hostGuardarPalabras() { 
+        let p = leerInputsData('host-inputs-palabras', numPalabras, 'error-host'); if(!p) return; 
+        misPalabras = p; 
+        hostGuardoPalabras = true;
+        document.getElementById('error-host').innerText = "";
+        
         let btn = document.getElementById('btn-esperar');
-        btn.innerText="¡AMBOS LISTOS! INICIAR PARTIDA"; 
-        btn.disabled=false;
-        btn.onclick = () => {
-            turnoActual=Math.random()<0.5?1:2; 
-            conn.send({tipo:'START_GAME', turno:turnoActual, palabrasHost:misPalabras}); 
-            iniciarProgreso(palabrasRivalTemporal);
-            iniciarTablero();
-        };
+        btn.disabled = true; 
+        btn.onclick = null;
+        
+        actualizarBotonHost();
     }
 
-    function guestGuardarPalabras() { 
-        let p = leerInputsData('guest-inputs-palabras', numPalabras, 'error-guest'); if(!p) return; 
-        misPalabras = p; 
-        conn.send({tipo:'GUEST_READY', palabras:misPalabras, nombre:miNombre}); 
-        document.getElementById('caja-inputs-guest-clasico').innerHTML="<div style='padding:20px; background:#f8fafc; border-radius:16px; font-weight:800; color:var(--blue-dark); text-align:center;'>Esperando a que el Host inicie la partida...</div>"; 
+    // Funciones temporales para iniciar partida (Para que no de error el botón)
+    function iniciarPartidaJefe() { alert("El Modo Jefe está en construcción. ¡Solo arreglamos el Menú por ahora!"); }
+    function iniciarPartidaNormal() { 
+        if(maxJugadores === 2) {
+            turnoActual=Math.random()<0.5?1:2; 
+            conn.send({tipo:'START_GAME', turno:turnoActual, palabrasHost:misPalabras}); 
+            iniciarTablero();
+        } else {
+            alert("Modo Masivo en construcción.");
+        }
     }
-    // --------------------------------------------------
+    // --------------------------------------
 
     function guestConectar() { 
         let c = document.getElementById('guest-codigo').value.toUpperCase(); if(!c) return; 
@@ -493,10 +530,17 @@
         conn = peer.connect('funword-'+c); 
         conn.on('open', ()=>{ 
             document.getElementById('error-guest-conexion').innerText=""; 
-            configMensajes();
+            configMensajes(conn);
             conn.send({tipo: 'REQ_HANDSHAKE', nombre: miNombre});
         }); 
         peer.on('error', ()=> document.getElementById('error-guest-conexion').innerText="Sala no encontrada."); 
+    }
+
+    function guestGuardarPalabras() { 
+        let p = leerInputsData('guest-inputs-palabras', numPalabras, 'error-guest'); if(!p) return; 
+        misPalabras = p; 
+        conn.send({tipo:'GUEST_READY', palabras:misPalabras, nombre:miNombre}); 
+        document.getElementById('caja-inputs-guest-clasico').innerHTML="<div style='padding:20px; background:#f8fafc; border-radius:16px; font-weight:800; color:var(--blue-dark); text-align:center;'>¡Palabras listas! Esperando a que el Host inicie la partida...</div>"; 
     }
 
     function leerInputsData(id, cant, errId) { let p=[]; let e=document.getElementById(errId); for(let i=0; i<cant; i++){ let v=document.getElementById(`${id}-p${i}`).value.trim().toUpperCase(), h=document.getElementById(`${id}-h${i}`).value.trim(); if(v.length<3){ e.innerText="Mínimo 3 letras por palabra."; return null; } p.push({palabra:v, pista:h}); } e.innerText=""; return p; }
@@ -507,62 +551,63 @@
         conn.send({tipo: 'READY_FRENZY'});
     }
 
-    function configMensajes() {
-        conn.on('data', d => {
+    function configMensajes(conexionActual) {
+        let cx = miRol === 1 ? conexionActual : conn;
+
+        cx.on('data', d => {
             if (d.tipo === 'REQ_HANDSHAKE' && miRol === 1) {
                 nombreRival = d.nombre;
-                conn.send({tipo: 'HANDSHAKE', modo: modoJuego, num: numPalabras, tiempo: tiempoMax, nombre: miNombre});
+                cx.send({tipo: 'HANDSHAKE', modo: modoJuego, num: numPalabras, tiempo: tiempoMax, nombre: miNombre});
             }
-            else if(d.tipo==='HANDSHAKE' && miRol===2) {
+            else if(d.tipo === 'HANDSHAKE' && miRol === 2) {
                 modoJuego = d.modo; numPalabras = d.num; tiempoMax = d.tiempo; nombreRival = d.nombre;
                 document.getElementById('guest-paso1').classList.add('oculto'); document.getElementById('guest-paso2').classList.remove('oculto');
                 try { history.pushState({p:'espera'}, "", "#espera"); } catch(e){}
 
-                if (modoJuego === 'clasico') {
-                    document.getElementById('guest-info-modo').innerText = `Jugaremos con ${numPalabras} palabras.`;
-                    document.getElementById('caja-inputs-guest-clasico').classList.remove('oculto');
-                    document.getElementById('caja-espera-frenesi').classList.add('oculto');
-                    generarInputsHtml('guest-inputs-palabras', numPalabras);
-                } else {
-                    document.getElementById('guest-info-modo').classList.add('oculto');
-                    document.getElementById('caja-inputs-guest-clasico').classList.add('oculto');
+                // Resetear todas las cajas
+                document.getElementById('caja-inputs-guest-clasico').classList.add('oculto');
+                document.getElementById('caja-espera-frenesi').classList.add('oculto');
+                document.getElementById('caja-espera-jefe').classList.add('oculto');
+                document.getElementById('guest-info-modo').classList.add('oculto');
+
+                // Lógica Inteligente para el Guest
+                if (modoJuego === 'frenetico') {
                     document.getElementById('caja-espera-frenesi').classList.remove('oculto');
+                } else if (modoJuego === 'jefe') {
+                    document.getElementById('caja-espera-jefe').classList.remove('oculto');
+                } else {
+                    // Clásico, Batalla, Cadena (Todos requieren que el invitado escriba)
+                    document.getElementById('guest-info-modo').innerText = `Jugaremos con ${numPalabras} palabras.`;
+                    document.getElementById('guest-info-modo').classList.remove('oculto');
+                    document.getElementById('caja-inputs-guest-clasico').classList.remove('oculto');
+                    generarInputsHtml('guest-inputs-palabras', numPalabras);
                 }
             }
-            else if (d.tipo==='READY_FRENZY' && miRol===1) {
-                let btn = document.getElementById('btn-esperar');
-                btn.innerText="¡RIVAL LISTO! INICIAR FRENESÍ"; 
-                btn.disabled=false;
-                btn.onclick = () => { conn.send({tipo: 'START_FRENZY'}); startFrenzyCountdown(); };
+            else if (d.tipo === 'READY_FRENZY' && miRol === 1) {
+                // Solo para Frenetico (Por ahora simula 1v1)
+                invitadosListos++;
+                actualizarBotonHost();
             }
-            else if (d.tipo==='START_FRENZY' && miRol===2) {
+            else if (d.tipo === 'START_FRENZY' && miRol === 2) {
                 startFrenzyCountdown();
             }
-            else if (d.tipo==='SUBMIT_FRENZY') {
+            else if (d.tipo === 'SUBMIT_FRENZY') {
                 estadoFrenzyRival = d.death ? 'MUERTO' : 'VIVO';
                 if(!d.death) progresoRival = d.palabras.map(p => ({ secreto:p.palabra, pista:p.pista, adivinadas:[p.palabra[0], p.palabra[p.palabra.length-1]], errL:0, errP:0, resuelta:false, fracasada:false }));
                 checkFrenzyMuerteSubita();
             }
-            // --- NUEVO RECEPTOR DEL GUEST READY ---
             else if (d.tipo === 'GUEST_READY' && miRol === 1) {
-                palabrasRivalTemporal = d.palabras;
-                if (misPalabras.length > 0) {
-                    prepararBotonInicio();
-                } else {
-                    let btn = document.getElementById('btn-esperar');
-                    if (btn.innerText === "¡Rival Conectado! Escribe tus palabras") {
-                        btn.innerText = "¡Rival Listo! Escribe y guarda tus palabras";
-                    }
-                }
+                invitadosListos++;
+                iniciarProgreso(d.palabras); // Guardamos las palabras del guest
+                actualizarBotonHost();
             }
-            else if(d.tipo==='START_GAME' && miRol===2){ 
+            else if (d.tipo === 'START_GAME' && miRol === 2) { 
                 turnoActual=d.turno; 
                 iniciarProgreso(d.palabrasHost); 
                 iniciarTablero(); 
             }
-            // ---------------------------------------
-            else if(d.tipo==='ACCION'){ procesarRival(d); }
-            else if(d.tipo==='REMATCH_REQ'){ prepararRevancha(); }
+            else if (d.tipo === 'ACCION'){ procesarRival(d); }
+            else if (d.tipo === 'REMATCH_REQ'){ prepararRevancha(); }
         });
     }
 
@@ -657,6 +702,7 @@
     }
 
     function iniciarProgreso(pr) {
+        if (!pr) return;
         progresoRival = pr.map(p => ({ secreto:p.palabra, pista:p.pista, adivinadas:[p.palabra[0], p.palabra[p.palabra.length-1]], errL:0, errP:0, resuelta:false, fracasada:false }));
         estadoMisPalabras = misPalabras.map(p => ({ secreto:p.palabra, adivinadas:[p.palabra[0], p.palabra[p.palabra.length-1]], resuelta:false, fracasada:false, errL:0, errP:0 }));
     }
